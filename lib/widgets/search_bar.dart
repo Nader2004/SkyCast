@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class SearchBar extends StatelessWidget {
-  const SearchBar({super.key});
+  final Function(String) onSearch;
+  final FocusNode focusNode;
+  const SearchBar({super.key, required this.onSearch, required this.focusNode});
 
   @override
   Widget build(BuildContext context) {
@@ -12,6 +14,8 @@ class SearchBar extends StatelessWidget {
           color: Colors.grey[700],
           fontWeight: FontWeight.w400,
         ),
+        focusNode: focusNode,
+        onChanged: onSearch,
         cursorColor: Colors.grey[600],
         cursorHeight: 22,
         decoration: InputDecoration(
