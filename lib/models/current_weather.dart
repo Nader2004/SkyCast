@@ -16,7 +16,7 @@ class CurrentWeather {
   final int windDeg;
   final List<WeatherDescription> weather;
 
-  CurrentWeather({
+  const CurrentWeather({
     required this.dt,
     required this.sunrise,
     required this.sunset,
@@ -47,6 +47,7 @@ class CurrentWeather {
         visibility: json['visibility'],
         windSpeed: json['wind_speed'].toDouble(),
         windDeg: json['wind_deg'],
-        weather: List<WeatherDescription>.from(json['weather'].map((x) => WeatherDescription.fromJson(x))),
+        weather: List<WeatherDescription>.from(
+            json['weather'].map((x) => WeatherDescription.fromJson(x))),
       );
 }

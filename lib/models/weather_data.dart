@@ -13,7 +13,7 @@ class WeatherData {
   final List<Hourly> hourly;
   final List<Daily> daily;
 
-  WeatherData({
+ const WeatherData({
     required this.lat,
     required this.lon,
     required this.timezone,

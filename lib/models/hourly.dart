@@ -16,7 +16,7 @@ class Hourly {
   final List<WeatherDescription> weather;
   final double pop;
 
-  Hourly({
+ const Hourly({
     required this.dt,
     required this.temp,
     required this.feelsLike,

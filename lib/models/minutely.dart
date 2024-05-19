@@ -2,7 +2,7 @@ class Minutely {
   final int dt;
   final double precipitation;
 
-  Minutely({
+ const Minutely({
     required this.dt,
     required this.precipitation,
   });

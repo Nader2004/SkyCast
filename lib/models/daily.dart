@@ -23,7 +23,7 @@ class Daily {
   final double rain;
   final double uvi;
 
-  Daily({
+ const Daily({
     required this.dt,
     required this.sunrise,
     required this.sunset,

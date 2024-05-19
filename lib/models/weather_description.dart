@@ -4,7 +4,7 @@ class WeatherDescription {
   final String description;
   final String icon;
 
-  WeatherDescription({
+ const WeatherDescription({
     required this.id,
     required this.main,
     required this.description,

@@ -4,7 +4,7 @@ class DailyFeelsLike {
   final double eve;
   final double morn;
 
-  DailyFeelsLike({
+ const DailyFeelsLike({
     required this.day,
     required this.night,
     required this.eve,

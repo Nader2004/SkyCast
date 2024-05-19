@@ -6,7 +6,7 @@ class DailyTemperature {
   final double eve;
   final double morn;
 
-  DailyTemperature({
+ const DailyTemperature({
     required this.day,
     required this.min,
     required this.max,
