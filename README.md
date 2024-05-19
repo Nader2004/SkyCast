@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # website_weather_app
 We will start developing the website for the weather app, for the Front-End Project.
 =======
@@ -18,4 +18,3 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
->>>>>>> e19479b (first commit for our skycast flutter project , includes the basic packages we need plus the dart objects that will be used and the api service for calling the api, this is the basic setup)
