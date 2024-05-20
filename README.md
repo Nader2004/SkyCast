@@ -4,7 +4,7 @@ We will start developing the website for the weather app, for the Front-End Proj
 =======
 # sky_cast
 
-A new Flutter project.
+Sky Cast is a weather app for a university group project that is build using the flutter framework and using the https://openweathermap.org API.
 
 ## Getting Started
 
