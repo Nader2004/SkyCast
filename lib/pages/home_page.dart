@@ -43,6 +43,33 @@ class _HomePageState extends State<HomePage> {
     await WeatherApiService().fetchWeather(30.44, -94.04);
   }
 
+  List<TextSpan> highlightOccurrences(String source, String query) {
+    if (query.isEmpty) {
+      return [TextSpan(text: source)];
+    }
+
+    List<TextSpan> spans = <TextSpan>[];
+    int start = 0;
+    int indexOfHighlight = source.toLowerCase().indexOf(query.toLowerCase());
+
+    while (indexOfHighlight != -1) {
+      spans.add(TextSpan(text: source.substring(start, indexOfHighlight)));
+      start = indexOfHighlight;
+      indexOfHighlight = start + query.length;
+      spans.add(TextSpan(
+        text: source.substring(start, indexOfHighlight),
+        style: const TextStyle(color: Colors.blue),
+      ));
+      start = indexOfHighlight;
+      indexOfHighlight =
+          source.toLowerCase().indexOf(query.toLowerCase(), start);
+    }
+
+    spans.add(TextSpan(text: source.substring(start)));
+
+    return spans;
+  }
+
   @override
   void dispose() {
     _focusNode.removeListener(_focusListener);
@@ -117,11 +144,18 @@ class _HomePageState extends State<HomePage> {
                     ? ListView.builder(
                         itemBuilder: (context, index) => ListTile(
                           leading: const Icon(Icons.location_city),
-                          title: Text(
-                              '${_filteredCities[index].name}, ${_filteredCities[index].country}',
+                          title: RichText(
+                            text: TextSpan(
                               style: const TextStyle(
+                                color: Colors.black,
                                 fontWeight: FontWeight.w500,
-                              )),
+                              ),
+                              children: highlightOccurrences(
+                                '${_filteredCities[index].name}, ${_filteredCities[index].country}',
+                                _searchValue,
+                              ),
+                            ),
+                          ),
                           onTap: () {},
                         ),
                         itemCount: _filteredCities.length,
