@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:sky_cast/constants/cities.dart';
+import 'package:sky_cast/models/city.dart';
 import 'package:sky_cast/services/weather_api_service.dart';
 import 'package:sky_cast/widgets/city_weather_info.dart';
 import 'package:sky_cast/widgets/top_bar.dart';
@@ -15,6 +17,8 @@ class _HomePageState extends State<HomePage> {
   final FocusNode _focusNode = FocusNode();
 
   bool _readyToType = false;
+  String _searchValue = '';
+  List<City> _filteredCities = [];
 
   @override
   void initState() {
@@ -24,7 +28,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _focusListener() {
-    debugPrint('Focus: ${_focusNode.hasFocus}');
     if (_focusNode.hasFocus) {
       setState(() {
         _readyToType = true;
@@ -61,18 +64,73 @@ class _HomePageState extends State<HomePage> {
               backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
               body: NestedScrollView(
                 headerSliverBuilder: (context, _) => [
-                  SliverToBoxAdapter(
-                    child: TopBar(
-                      onSearch: (value) {},
+                  SliverAppBar(
+                    bottom: PreferredSize(
+                      preferredSize: Size.fromHeight(
+                        _readyToType
+                            ? MediaQuery.of(context).size.height * 0.04
+                            : MediaQuery.of(context).size.height * 0.09,
+                      ),
+                      child: const SizedBox.shrink(),
+                    ),
+                    backgroundColor:
+                        Theme.of(context).colorScheme.secondaryContainer,
+                    floating: true,
+                    snap: true,
+                    flexibleSpace: TopBar(
+                      onSearch: (value) {
+                        setState(() {
+                          _searchValue = value;
+                          if (_searchValue.isEmpty) {
+                            _filteredCities = cities;
+                          } else {
+                            List<City> startsWith = cities
+                                .where((city) =>
+                                    city.name.toLowerCase().startsWith(
+                                        _searchValue.toLowerCase()) ||
+                                    ('${city.name}, ${city.country}')
+                                        .toLowerCase()
+                                        .startsWith(_searchValue.toLowerCase()))
+                                .toList();
+                            List<City> contains = cities
+                                .where((city) =>
+                                    city.name
+                                        .toLowerCase()
+                                        .contains(_searchValue.toLowerCase()) ||
+                                    ('${city.name}, ${city.country}')
+                                        .toLowerCase()
+                                        .contains(_searchValue.toLowerCase()))
+                                .toList();
+                            _filteredCities = startsWith +
+                                contains
+                                    .where((city) => !startsWith.contains(city))
+                                    .toList();
+                          }
+                        });
+                      },
                       focusNode: _focusNode,
                       isReadyToType: _readyToType,
                     ),
                   ),
                 ],
-                body: ListView.builder(
-                  itemBuilder: (context, index) => const CityWeatherInfo(),
-                  itemCount: 10,
-                ),
+                body: _searchValue.isNotEmpty
+                    ? ListView.builder(
+                        itemBuilder: (context, index) => ListTile(
+                          leading: const Icon(Icons.location_city),
+                          title: Text(
+                              '${_filteredCities[index].name}, ${_filteredCities[index].country}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                              )),
+                          onTap: () {},
+                        ),
+                        itemCount: _filteredCities.length,
+                      )
+                    : ListView.builder(
+                        itemBuilder: (context, index) =>
+                            const CityWeatherInfo(),
+                        itemCount: 10,
+                      ),
               ),
             ),
           ),
