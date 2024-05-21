@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sky_cast/constants/cities.dart';
 import 'package:sky_cast/models/city.dart';
-import 'package:sky_cast/services/weather_api_service.dart';
 import 'package:sky_cast/widgets/city_weather_info.dart';
 import 'package:sky_cast/widgets/top_bar.dart';
 
@@ -15,6 +17,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final FocusNode _focusNode = FocusNode();
+  final List<City> _weatherCities = [];
 
   bool _readyToType = false;
   String _searchValue = '';
@@ -22,9 +25,90 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    fetchWeatherData();
+    _initPrefs();
     _focusNode.addListener(_focusListener);
     super.initState();
+  }
+
+  Future<void> _initPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.containsKey('cities')) {
+      Map<String, City> cityMap = {for (City city in cities) city.name: city};
+      for (String cityName in prefs.getStringList('cities')!) {
+        City? city = cityMap[cityName];
+        if (city != null) {
+          _weatherCities.add(city);
+        }
+      }
+    }
+    final City? city = await _getCurrentPosition();
+    if (city != null) {
+      debugPrint(city.country);
+      setState(() {
+        _weatherCities.insert(0, city);
+      });
+    }
+  }
+
+  Future<bool> _handleLocationPermission() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              'Location services are disabled. Please enable the services'),
+        ),
+      );
+      return false;
+    }
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Location permissions are denied'),
+          ),
+        );
+        return false;
+      }
+    }
+    if (permission == LocationPermission.deniedForever && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              'Location permissions are permanently denied, we cannot request permissions.'),
+        ),
+      );
+      return false;
+    }
+    return true;
+  }
+
+  Future<City?> _getCurrentPosition() async {
+    final hasPermission = await _handleLocationPermission();
+    if (!hasPermission) return null;
+    final Position position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+    final Placemark placemark = await _getAddressFromLatLng(position);
+    final City city = City(
+      name: placemark.locality!,
+      country: placemark.country!,
+      lon: position.longitude,
+      lat: position.latitude,
+      isMyLocation: true,
+    );
+    return city;
+  }
+
+  Future<Placemark> _getAddressFromLatLng(Position position) async {
+    final List<Placemark> placemarks =
+        await placemarkFromCoordinates(position.latitude, position.longitude);
+    return placemarks.first;
   }
 
   void _focusListener() {
@@ -37,10 +121,6 @@ class _HomePageState extends State<HomePage> {
         _readyToType = false;
       });
     }
-  }
-
-  void fetchWeatherData() async {
-    await WeatherApiService().fetchWeather(30.44, -94.04);
   }
 
   List<TextSpan> highlightOccurrences(String source, String query) {
@@ -162,8 +242,8 @@ class _HomePageState extends State<HomePage> {
                       )
                     : ListView.builder(
                         itemBuilder: (context, index) =>
-                            const CityWeatherInfo(),
-                        itemCount: 10,
+                            CityWeatherInfo(city: _weatherCities[index]),
+                        itemCount: _weatherCities.length,
                       ),
               ),
             ),
