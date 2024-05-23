@@ -231,7 +231,6 @@ const List<City> cities = [
   City(name: 'Jaipur', lon: 75.78781, lat: 26.91962, country: 'India'),
   City(name: 'Jakarta', lon: 106.84513, lat: -6.21462, country: 'Indonesia'),
   City(name: 'Jeddah', lon: 39.18624, lat: 21.49012, country: 'Saudi Arabia'),
-  City(name: 'Jerusalem', lon: 35.21633, lat: 31.76904, country: 'Israel'),
   City(
       name: 'Johannesburg',
       lon: 28.04363,
@@ -363,7 +362,6 @@ const List<City> cities = [
   City(name: 'Tbilisi', lon: 44.83368, lat: 41.69411, country: 'Georgia'),
   City(name: 'Tegucigalpa', lon: -87.20681, lat: 14.0818, country: 'Honduras'),
   City(name: 'Tehran', lon: 51.42151, lat: 35.69439, country: 'Iran'),
-  City(name: 'Tel Aviv', lon: 34.78057, lat: 32.08088, country: 'Israel'),
   City(name: 'Thimphu', lon: 89.64191, lat: 27.46609, country: 'Bhutan'),
   City(name: 'Tianjin', lon: 117.17667, lat: 39.14222, country: 'China'),
   City(name: 'Tijuana', lon: -117.00371, lat: 32.5027, country: 'Mexico'),

@@ -35,19 +35,21 @@ class CurrentWeather {
 
   factory CurrentWeather.fromJson(Map<String, dynamic> json) => CurrentWeather(
         dt: json['dt'],
-        sunrise: json['sunrise'],
-        sunset: json['sunset'],
-        temp: json['temp'].toDouble(),
-        feelsLike: json['feels_like'].toDouble(),
-        pressure: json['pressure'],
-        humidity: json['humidity'],
-        dewPoint: json['dew_point'].toDouble(),
-        uvi: json['uvi'].toDouble(),
-        clouds: json['clouds'],
-        visibility: json['visibility'],
-        windSpeed: json['wind_speed'].toDouble(),
-        windDeg: json['wind_deg'],
-        weather: List<WeatherDescription>.from(
-            json['weather'].map((x) => WeatherDescription.fromJson(x))),
+        sunrise: json['sunrise'] ?? 0,
+        sunset: json['sunset'] ?? 0,
+        temp: json['temp'].toDouble() ?? 0,
+        feelsLike: json['feels_like'].toDouble() ?? 0,
+        pressure: json['pressure'] ?? 0,
+        humidity: json['humidity'] ?? 0,
+        dewPoint: json['dew_point'].toDouble() ?? 0,
+        uvi: json['uvi'].toDouble() ?? 0,
+        clouds: json['clouds'] ?? 0,
+        visibility: json['visibility'] ?? 0,
+        windSpeed: json['wind_speed'].toDouble() ?? 0,
+        windDeg: json['wind_deg'] ?? 0,
+        weather: json['weather'] == null
+            ? []
+            : List<WeatherDescription>.from(
+                json['weather'].map((x) => WeatherDescription.fromJson(x))),
       );
 }

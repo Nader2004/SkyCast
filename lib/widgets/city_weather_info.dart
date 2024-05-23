@@ -3,7 +3,6 @@ import 'package:sky_cast/models/city.dart';
 import 'package:sky_cast/models/weather_data.dart';
 import 'package:sky_cast/services/weather_api_service.dart';
 import 'package:sky_cast/widgets/utils/weather_condition.dart';
-import 'package:sky_cast/widgets/weather_conditions/sunny_condition.dart';
 
 class CityWeatherInfo extends StatefulWidget {
   final City city;
@@ -35,7 +34,7 @@ class _CityWeatherInfoState extends State<CityWeatherInfo> {
       width: MediaQuery.of(context).size.width,
       height: MediaQuery.of(context).size.height * 0.11,
       margin: EdgeInsets.symmetric(
-        horizontal: MediaQuery.of(context).size.width * 0.07,
+        horizontal: MediaQuery.of(context).size.width * 0.1,
         vertical: 10,
       ),
       decoration: BoxDecoration(
@@ -48,7 +47,7 @@ class _CityWeatherInfoState extends State<CityWeatherInfo> {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const SizedBox.shrink();
             }
-            final WeatherData weatherData = snapshot.data!;
+            final WeatherData weatherData = snapshot.data as WeatherData;
             return Stack(
               children: [
                 Opacity(

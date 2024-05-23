@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:sky_cast/models/weather_data.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -12,8 +11,6 @@ class WeatherApiService {
     final response = await http.get(
       Uri.parse('$baseUrl?lat=$lat&lon=$lon&appid=$apiKey'),
     );
-
-    debugPrint('Response: ${response.body}');
 
     if (response.statusCode == 200) {
       return WeatherData.fromJson(json.decode(response.body));

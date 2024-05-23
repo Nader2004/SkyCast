@@ -5,6 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sky_cast/constants/cities.dart';
 import 'package:sky_cast/models/city.dart';
+import 'package:sky_cast/widgets/city_addition_bottom_sheet.dart';
 import 'package:sky_cast/widgets/city_weather_info.dart';
 import 'package:sky_cast/widgets/top_bar.dart';
 
@@ -16,6 +17,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  late SharedPreferences _prefs;
+
   final FocusNode _focusNode = FocusNode();
   final List<City> _weatherCities = [];
 
@@ -31,10 +34,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _initPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    if (prefs.containsKey('cities')) {
+    _prefs = await SharedPreferences.getInstance();
+    if (_prefs.containsKey('cities')) {
       Map<String, City> cityMap = {for (City city in cities) city.name: city};
-      for (String cityName in prefs.getStringList('cities')!) {
+      for (String cityName in _prefs.getStringList('cities')!) {
         City? city = cityMap[cityName];
         if (city != null) {
           _weatherCities.add(city);
@@ -43,7 +46,6 @@ class _HomePageState extends State<HomePage> {
     }
     final City? city = await _getCurrentPosition();
     if (city != null) {
-      debugPrint(city.country);
       setState(() {
         _weatherCities.insert(0, city);
       });
@@ -223,27 +225,69 @@ class _HomePageState extends State<HomePage> {
                 body: _searchValue.isNotEmpty
                     ? ListView.builder(
                         itemBuilder: (context, index) => ListTile(
-                          leading: const Icon(Icons.location_city),
-                          title: RichText(
-                            text: TextSpan(
-                              style: const TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              children: highlightOccurrences(
-                                '${_filteredCities[index].name}, ${_filteredCities[index].country}',
-                                _searchValue,
+                            leading: const Icon(Icons.location_city),
+                            title: RichText(
+                              text: TextSpan(
+                                style: const TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                children: highlightOccurrences(
+                                  '${_filteredCities[index].name}, ${_filteredCities[index].country}',
+                                  _searchValue,
+                                ),
                               ),
                             ),
-                          ),
-                          onTap: () {},
-                        ),
+                            onTap: () async {
+                              final map = await showModalBottomSheet<
+                                  Map<String, dynamic>?>(
+                                context: context,
+                                builder: (context) {
+                                  return CityAdditionButtomSheet(
+                                    city: _filteredCities[index],
+                                    action: () =>
+                                        setState(() => _searchValue = ''),
+                                  );
+                                },
+                              );
+                              if (map == null) return;
+                              if (map['action'] == 'add') {
+                                setState(() {
+                                  _weatherCities.add(_filteredCities[index]);
+                                });
+                              } else {
+                                setState(() {
+                                  _weatherCities.remove(_filteredCities[index]);
+                                });
+                              }
+                            }),
                         itemCount: _filteredCities.length,
                       )
-                    : ListView.builder(
-                        itemBuilder: (context, index) =>
-                            CityWeatherInfo(city: _weatherCities[index]),
+                    : ReorderableListView.builder(
+                        onReorder: (oldIndex, newIndex) {
+                          setState(() {
+                            // These two lines are workarounds for ReorderableListView problems
+                            if (newIndex > _weatherCities.length) {
+                              newIndex = _weatherCities.length;
+                            }
+                            if (oldIndex < newIndex) newIndex--;
+
+                            City item = _weatherCities[oldIndex];
+                            _weatherCities.remove(item);
+                            _weatherCities.insert(newIndex, item);
+                            _prefs.setStringList(
+                              'cities',
+                              _weatherCities.map((e) => e.name).toList(),
+                            );
+                          });
+                        },
+                        itemBuilder: (context, index) => CityWeatherInfo(
+                          key: ValueKey(index),
+                          city: _weatherCities[index],
+                        ),
                         itemCount: _weatherCities.length,
+                        keyboardDismissBehavior:
+                            ScrollViewKeyboardDismissBehavior.onDrag,
                       ),
               ),
             ),
