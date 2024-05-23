@@ -3,7 +3,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sky_cast/models/city.dart';
 import 'package:sky_cast/models/weather_data.dart';
 import 'package:sky_cast/services/weather_api_service.dart';
+import 'package:sky_cast/widgets/shadow_text.dart';
 import 'package:sky_cast/widgets/utils/weather_condition.dart';
+import 'package:sky_cast/widgets/weather_days_forecast.dart';
 
 class CityAdditionButtomSheet extends StatefulWidget {
   final City city;
@@ -45,7 +47,7 @@ class _CityAdditionButtomSheetState extends State<CityAdditionButtomSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.6,
+      height: MediaQuery.of(context).size.height * 0.8,
       width: MediaQuery.of(context).size.width,
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.secondaryContainer,
@@ -82,12 +84,9 @@ class _CityAdditionButtomSheetState extends State<CityAdditionButtomSheet> {
                     children: [
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        child: const Text(
-                          'Cancel',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                          ),
+                        child: const ShadowText(
+                          data: 'Cancel',
+                          fontSize: 20,
                         ),
                       ),
                       TextButton(
@@ -107,91 +106,66 @@ class _CityAdditionButtomSheetState extends State<CityAdditionButtomSheet> {
                           }
                           widget.action();
                         },
-                        child: Text(
-                          _cities.contains(widget.city.name) ? 'Remove' : 'Add',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                          ),
-                        ),
+                        child: ShadowText(
+                          data: _cities.contains(widget.city.name)
+                              ? 'Remove'
+                              : 'Add',
+                          fontSize: 20,
+                        )
                       ),
                     ],
                   ),
                 ),
               ),
               Positioned.fill(
-                child: Align(
-                  alignment: Alignment.center,
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          widget.city.name,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 35,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                top: MediaQuery.of(context).size.height * 0.1,
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ShadowText(
+                        data: widget.city.name,
+                        fontSize: 35,
+                        fontWeight: FontWeight.bold,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          '${(weatherData.current.temp - 273.15).round()}°C',
-                          style: const TextStyle(
-                            color: Colors.white,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          ShadowText(
+                            data:
+                                '${(weatherData.current.temp - 273.15).round()}°C',
                             fontSize: 35,
                           ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          weatherData.current.weather[0].description,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        margin: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.07),
-                        decoration: BoxDecoration(
-                          color: Colors.blueGrey,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Wrap(
-                          children: [
-                            for (final weather in weatherData.daily)
-                             
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      '${DateTime.fromMillisecondsSinceEpoch(weather.dt * 1000).day}/${DateTime.fromMillisecondsSinceEpoch(weather.dt * 1000).month}',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 20,
-                                      ),
-                                    ),
-                                    Text(
-                                      '${(weather.temp.day - 273.15).round()}°C',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 20,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ShadowText(
+                                data:
+                                    'H: ${(weatherData.daily[0].temp.max - 273.15).round()}°C',
+                                fontSize: 16,
                               ),
-                          ],
-                        ),
+                              const SizedBox(width: 10),
+                              ShadowText(
+                                data:
+                                    'L: ${(weatherData.daily[0].temp.min - 273.15).round()}°C',
+                                fontSize: 16,
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ShadowText(
+                        data: weatherData.current.weather[0].description,
+                        fontSize: 20,
+                      ),
+                    ),
+                    WeatherDaysForecast(weatherData: weatherData),
+                  ],
                 ),
               ),
             ],

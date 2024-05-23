@@ -242,6 +242,15 @@ class _HomePageState extends State<HomePage> {
                               final map = await showModalBottomSheet<
                                   Map<String, dynamic>?>(
                                 context: context,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(20),
+                                  ),
+                                ),
+                                backgroundColor: Theme.of(context)
+                                    .colorScheme
+                                    .secondaryContainer,
+                                isScrollControlled: true,    
                                 builder: (context) {
                                   return CityAdditionButtomSheet(
                                     city: _filteredCities[index],
