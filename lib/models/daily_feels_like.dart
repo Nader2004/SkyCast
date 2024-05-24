@@ -12,9 +12,9 @@ class DailyFeelsLike {
   });
 
   factory DailyFeelsLike.fromJson(Map<String, dynamic> json) => DailyFeelsLike(
-        day: json['day'].toDouble(),
-        night: json['night'].toDouble(),
-        eve: json['eve'].toDouble(),
-        morn: json['morn'].toDouble(),
+        day: json['day'].toDouble() ?? 0.0,
+        night: json['night'].toDouble() ?? 0.0,
+        eve: json['eve'].toDouble() ?? 0.0,
+        morn: json['morn'].toDouble() ?? 0.0,
       );
 }

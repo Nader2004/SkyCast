@@ -17,11 +17,11 @@ class DailyTemperature {
 
   factory DailyTemperature.fromJson(Map<String, dynamic> json) =>
       DailyTemperature(
-        day: json['day'].toDouble(),
-        min: json['min'].toDouble(),
-        max: json['max'].toDouble(),
-        night: json['night'].toDouble(),
-        eve: json['eve'].toDouble(),
-        morn: json['morn'].toDouble(),
+        day: json['day'].toDouble() ?? 0.0,
+        min: json['min'].toDouble() ?? 0.0,
+        max: json['max'].toDouble() ?? 0.0,
+        night: json['night'].toDouble() ?? 0.0,
+        eve: json['eve'].toDouble() ?? 0.0,
+        morn: json['morn'].toDouble() ?? 0.0,
       );
 }

@@ -4,13 +4,20 @@ class ShadowText extends StatelessWidget {
   final String data;
   final double? fontSize;
   final FontWeight? fontWeight;
-  const ShadowText(
-      {super.key, required this.data, this.fontSize, this.fontWeight});
+  final TextAlign? textAlign;
+  const ShadowText({
+    super.key,
+    required this.data,
+    this.fontSize,
+    this.fontWeight,
+    this.textAlign,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Text(
       data,
+      textAlign: textAlign,
       style: TextStyle(
         fontSize: fontSize,
         fontWeight: fontWeight,

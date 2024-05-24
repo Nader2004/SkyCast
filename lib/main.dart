@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:sky_cast/models/city.dart';
+import 'package:sky_cast/pages/cities_page.dart';
 
 import 'pages/home_page.dart';
 
@@ -22,7 +24,33 @@ class SkyCast extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const HomePage(),
+      routes: {
+        '/': (context) => const HomePage(),
+      },
+      onGenerateRoute: (settings) {
+        if (settings.name == '/cities') {
+          final arguments = settings.arguments as Map<String, dynamic>;
+          final index = arguments['index'] as int;
+          final weatherCities = arguments['weatherCities'] as List<City>;
+          return PageRouteBuilder(
+            settings: settings,
+            pageBuilder: (context, firstAnimation, secondAnimation) =>
+                CitiesPage(
+              index: index,
+              weatherCities: weatherCities,
+            ),
+            transitionDuration: const Duration(milliseconds: 200),
+            transitionsBuilder: (
+              context,
+              animation,
+              secondaryAnimation,
+              child,
+            ) =>
+                ScaleTransition(scale: animation, child: child),
+          );
+        }
+        return null;
+      },
     );
   }
 }

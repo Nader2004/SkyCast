@@ -293,6 +293,8 @@ class _HomePageState extends State<HomePage> {
                         itemBuilder: (context, index) => CityWeatherInfo(
                           key: ValueKey(index),
                           city: _weatherCities[index],
+                          weatherCities: _weatherCities,
+                          index: index,
                         ),
                         itemCount: _weatherCities.length,
                         keyboardDismissBehavior:

@@ -16,7 +16,7 @@ class Hourly {
   final List<WeatherDescription> weather;
   final double pop;
 
- const Hourly({
+  const Hourly({
     required this.dt,
     required this.temp,
     required this.feelsLike,
@@ -34,20 +34,22 @@ class Hourly {
   });
 
   factory Hourly.fromJson(Map<String, dynamic> json) => Hourly(
-        dt: json['dt'],
-        temp: json['temp'].toDouble(),
-        feelsLike: json['feels_like'].toDouble(),
-        pressure: json['pressure'],
-        humidity: json['humidity'],
-        dewPoint: json['dew_point'].toDouble(),
-        uvi: json['uvi'].toDouble(),
-        clouds: json['clouds'],
-        visibility: json['visibility'].toInt(),
-        windSpeed: json['wind_speed'].toDouble(),
-        windDeg: json['wind_deg'],
-        windGust: json['wind_gust'].toDouble(),
-        weather: List<WeatherDescription>.from(
-            json['weather'].map((x) => WeatherDescription.fromJson(x))),
-        pop: json['pop'].toDouble(),
+        dt: json['dt'] ?? 0.0,
+        temp: json['temp'].toDouble() ?? 0.0,
+        feelsLike: json['feels_like'].toDouble() ?? 0.0,
+        pressure: json['pressure'] ?? 0,
+        humidity: json['humidity'] ?? 0,
+        dewPoint: json['dew_point'].toDouble() ?? 0.0,
+        uvi: json['uvi'].toDouble() ?? 0.0,
+        clouds: json['clouds'] ?? 0,
+        visibility: json['visibility'].toInt() ?? 0,
+        windSpeed: json['wind_speed'].toDouble() ?? 0.0,
+        windDeg: json['wind_deg'] ?? 0,
+        windGust: json['wind_gust'].toDouble() ?? 0.0,
+        weather: json['weather'] == null
+            ? []
+            : List<WeatherDescription>.from(
+                json['weather'].map((x) => WeatherDescription.fromJson(x))),
+        pop: json['pop'].toDouble() ?? 0.0,
       );
 }

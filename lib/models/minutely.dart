@@ -8,7 +8,7 @@ class Minutely {
   });
 
   factory Minutely.fromJson(Map<String, dynamic> json) => Minutely(
-        dt: json['dt'],
-        precipitation: json['precipitation'].toDouble(),
+        dt: json['dt'] ?? 0.0,
+        precipitation: json['precipitation'].toDouble() ?? 0.0,
       );
 }

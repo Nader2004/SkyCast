@@ -27,8 +27,8 @@ class WeatherData {
   factory WeatherData.fromJson(Map<String, dynamic> json) => WeatherData(
         lat: json['lat'].toDouble(),
         lon: json['lon'].toDouble(),
-        timezone: json['timezone'],
-        timezoneOffset: json['timezone_offset'],
+        timezone: json['timezone'] ?? '',
+        timezoneOffset: json['timezone_offset'] ?? 0,
         current: CurrentWeather.fromJson(json['current']),
         minutely: json['minutely'] == null
             ? []
