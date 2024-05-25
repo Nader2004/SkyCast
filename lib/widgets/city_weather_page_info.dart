@@ -39,7 +39,8 @@ class _CityWeatherInfoPageState extends State<CityWeatherInfoPage> {
       child: FutureBuilder<WeatherData>(
           future: _initializedFuture,
           builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting || snapshot.data == null) {
+            if (snapshot.connectionState == ConnectionState.waiting ||
+                snapshot.data == null) {
               return const SizedBox.shrink();
             }
 
@@ -89,7 +90,7 @@ class _CityWeatherInfoPageState extends State<CityWeatherInfoPage> {
                         child: ShadowText(
                           data: weatherData.daily[0].summary,
                           textAlign: TextAlign.center,
-                          fontSize: 18,
+                          fontSize: 16,
                         ),
                       ),
                       Padding(
@@ -120,8 +121,63 @@ class _CityWeatherInfoPageState extends State<CityWeatherInfoPage> {
                           ],
                         ),
                       ),
-                      SizedBox(height: MediaQuery.of(context).size.height * 0.07),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.05,
+                      ),
                       WeatherDaysForecast(weatherData: weatherData),
+                      Container(
+                        margin: EdgeInsets.symmetric(
+                          horizontal: MediaQuery.of(context).size.width * 0.06,
+                          vertical: 10,
+                        ),
+                        child: TextButton(
+                          onPressed: () => Navigator.of(context).pushNamed(
+                            '/details',
+                            arguments: {
+                              'city': widget.city,
+                              'weatherData': weatherData,
+                            },
+                          ),
+                          style: ButtonStyle(
+                            backgroundColor:
+                                MaterialStateProperty.all(Colors.blueGrey),
+                            padding: MaterialStateProperty.all(
+                              const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 10,
+                              ),
+                            ),
+                            shape: MaterialStateProperty.all(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                            ),
+                          ),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.cloud_circle,
+                                color: Colors.white,
+                              ),
+                              SizedBox(width: 10),
+                              Text(
+                                'See more weather details',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
+                              SizedBox(width: 10),
+                              Icon(
+                                Icons.arrow_forward_ios_rounded,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),

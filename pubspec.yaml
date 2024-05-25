@@ -45,6 +45,7 @@ dependencies:
   intl: ^0.19.0
   cached_network_image: ^3.3.1
   smooth_page_indicator: ^1.1.0
+  arc_progress_bar_new: ^1.0.4
   
 
 dev_dependencies:

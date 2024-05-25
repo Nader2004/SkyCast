@@ -16,7 +16,7 @@ class CitiesPage extends StatefulWidget {
   State<CitiesPage> createState() => _CitiesPageState();
 }
 
-class _CitiesPageState extends State<CitiesPage> {
+class _CitiesPageState extends State<CitiesPage> with AutomaticKeepAliveClientMixin {
   late PageController _pageController;
 
   @override
@@ -26,7 +26,11 @@ class _CitiesPageState extends State<CitiesPage> {
   }
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
       body: Stack(
@@ -75,6 +79,7 @@ class _CitiesPageState extends State<CitiesPage> {
                         icon: const Icon(
                           Icons.menu,
                           color: Colors.white,
+                          size: 30,
                         ),
                       ),
                     ),
