@@ -16,7 +16,8 @@ class CitiesPage extends StatefulWidget {
   State<CitiesPage> createState() => _CitiesPageState();
 }
 
-class _CitiesPageState extends State<CitiesPage> with AutomaticKeepAliveClientMixin {
+class _CitiesPageState extends State<CitiesPage>
+    with AutomaticKeepAliveClientMixin {
   late PageController _pageController;
 
   @override
@@ -54,6 +55,7 @@ class _CitiesPageState extends State<CitiesPage> with AutomaticKeepAliveClientMi
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
+                    const Spacer(flex: 2),
                     SmoothPageIndicator(
                       controller: _pageController,
                       count: widget.weatherCities.length,
@@ -69,9 +71,7 @@ class _CitiesPageState extends State<CitiesPage> with AutomaticKeepAliveClientMi
                         curve: Curves.easeIn,
                       ),
                     ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.2,
-                    ),
+                    const Spacer(flex: 1),
                     Padding(
                       padding: const EdgeInsets.only(right: 20),
                       child: IconButton(

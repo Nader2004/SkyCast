@@ -3,18 +3,26 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sky_cast/models/city.dart';
 import 'package:sky_cast/models/hourly.dart';
 import 'package:sky_cast/models/weather_data.dart';
 import 'package:sky_cast/widgets/shadow_text.dart';
 import 'package:sky_cast/widgets/utils/weather_condition.dart';
 import 'package:sky_cast/widgets/utils/weather_icon.dart';
+import 'package:sky_cast/widgets/utils/weather_pressure.dart';
+import 'package:sky_cast/widgets/utils/weather_temprature.dart';
+import 'package:sky_cast/widgets/utils/weather_wind_speed.dart';
 
 class CityWeatherDetailPage extends StatelessWidget {
   final WeatherData weatherData;
   final City city;
+  final SharedPreferences prefs;
   const CityWeatherDetailPage(
-      {super.key, required this.weatherData, required this.city});
+      {super.key,
+      required this.weatherData,
+      required this.city,
+      required this.prefs});
 
   Widget _buildWeatherDetail(String title, String value) {
     return Column(
@@ -83,233 +91,239 @@ class CityWeatherDetailPage extends StatelessWidget {
           ),
           Positioned.fill(
             top: MediaQuery.of(context).size.height * 0.15,
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      city.isMyLocation
-                          ? const ShadowText(
-                              data: 'My Location',
-                              fontSize: 35,
-                              fontWeight: FontWeight.bold,
-                            )
-                          : const SizedBox.shrink(),
-                      ShadowText(
-                        data: city.name,
-                        fontSize: city.isMyLocation ? 20 : 35,
-                        fontWeight: city.isMyLocation
-                            ? FontWeight.w500
-                            : FontWeight.bold,
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ShadowText(
-                    data: weatherData.daily[0].summary,
-                    textAlign: TextAlign.center,
-                    fontSize: 18,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    children: [
-                      ShadowText(
-                        data:
-                            '${(weatherData.current.temp - 273.15).round()}°C',
-                        fontSize: 35,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          ShadowText(
-                            data:
-                                'H: ${(weatherData.daily[0].temp.max - 273.15).round()}°C',
-                            fontSize: 16,
-                          ),
-                          const SizedBox(width: 10),
-                          ShadowText(
-                            data:
-                                'L: ${(weatherData.daily[0].temp.min - 273.15).round()}°C',
-                            fontSize: 16,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Container(
-                        height: MediaQuery.of(context).size.height * 0.42,
-                        width: MediaQuery.of(context).size.width,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[600]!.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: Colors.grey[500]!,
-                            width: 1,
-                          ),
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        city.isMyLocation
+                            ? const ShadowText(
+                                data: 'My Location',
+                                fontSize: 35,
+                                fontWeight: FontWeight.bold,
+                              )
+                            : const SizedBox.shrink(),
+                        ShadowText(
+                          data: city.name,
+                          fontSize: city.isMyLocation ? 20 : 35,
+                          fontWeight: city.isMyLocation
+                              ? FontWeight.w500
+                              : FontWeight.bold,
                         ),
-                        margin: EdgeInsets.symmetric(
-                          horizontal: MediaQuery.of(context).size.width * 0.04,
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ShadowText(
+                      data: weatherData.daily[0].summary,
+                      textAlign: TextAlign.center,
+                      fontSize: 18,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        ShadowText(
+                          data: getWeatherTemprature(
+                              weatherData.current.temp, prefs),
+                          fontSize: 35,
                         ),
-                        padding: const EdgeInsets.all(10),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            SizedBox(
-                              width: MediaQuery.of(context).size.width,
-                              height: MediaQuery.of(context).size.height * 0.15,
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: weatherData.hourly.length,
-                                itemBuilder: (context, index) {
-                                  final Hourly hourlyData =
-                                      weatherData.hourly[index];
-
-                                  final DateTime date =
-                                      DateTime.fromMillisecondsSinceEpoch(
-                                          hourlyData.dt * 1000);
-
-                                  final String hour =
-                                      DateFormat('HH').format(date);
-
-                                  final int tempCelsius =
-                                      (hourlyData.temp - 273.15).round();
-
-                                  return Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 10,
-                                    ),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        CachedNetworkImage(
-                                          imageUrl: getWeatherIcon(
-                                            hourlyData.weather[0].icon,
-                                          ),
-                                          height: 40,
-                                          width: 40,
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Text(
-                                          hour,
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        Text(
-                                          '$tempCelsius°C',
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              ),
+                            ShadowText(
+                              data:
+                                  'H: ${getWeatherTemprature(weatherData.daily[0].temp.max, prefs)}',
+                              fontSize: 16,
                             ),
-                            Column(
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Column(
-                                      children: [
-                                        Icon(
-                                          MdiIcons.weatherSunsetUp,
-                                          color: Colors.white,
-                                        ),
-                                        Text(
-                                          DateFormat('HH:mm').format(sunrise),
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(
-                                      width: MediaQuery.of(context).size.width /
-                                          2.5,
-                                      height:
-                                          MediaQuery.of(context).size.width /
-                                              2.5,
-                                      child: ArcProgressBar(
-                                        percentage: getCurrentPercentage(sunrise, sunset),
-                                        arcThickness: 3,
-                                        animateFromLastPercent: true,
-                                        handleSize: 8,
-                                        backgroundColor: Colors.black12,
-                                        foregroundColor: Colors.white,
-                                      ),
-                                    ),
-                                    Column(
-                                      children: [
-                                        Icon(
-                                          MdiIcons.weatherSunsetDown,
-                                          color: Colors.white,
-                                        ),
-                                        Text(
-                                          DateFormat('HH:mm').format(sunset),
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 5),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      _buildWeatherDetail(
-                                        'Feels like',
-                                        '${(weatherData.current.feelsLike - 273.15).round()}°C',
-                                      ),
-                                      _buildWeatherDetail(
-                                        'Humidity',
-                                        '${weatherData.current.humidity}%',
-                                      ),
-                                      _buildWeatherDetail(
-                                        'Wind',
-                                        '${weatherData.current.windSpeed.round()}Km/h',
-                                      ),
-                                      _buildWeatherDetail(
-                                        'Pressure',
-                                        '${weatherData.current.pressure}hPa',
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
+                            const SizedBox(width: 10),
+                            ShadowText(
+                              data:
+                                  'L: ${getWeatherTemprature(weatherData.daily[0].temp.min, prefs)}',
+                              fontSize: 16,
                             ),
                           ],
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 10),
+                        Container(
+                          height: MediaQuery.of(context).size.height * 0.46,
+                          width: MediaQuery.of(context).size.width,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[600]!.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: Colors.grey[500]!,
+                              width: 1,
+                            ),
+                          ),
+                          margin: EdgeInsets.symmetric(
+                            horizontal: MediaQuery.of(context).size.width * 0.04,
+                          ),
+                          padding: const EdgeInsets.all(10),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width,
+                                height: MediaQuery.of(context).size.height * 0.18,
+                                child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: weatherData.hourly.length,
+                                  itemBuilder: (context, index) {
+                                    final Hourly hourlyData =
+                                        weatherData.hourly[index];
+              
+                                    final DateTime date =
+                                        DateTime.fromMillisecondsSinceEpoch(
+                                            hourlyData.dt * 1000);
+              
+                                    final String hour =
+                                        DateFormat('HH').format(date);
+              
+                                    final String temp = getWeatherTemprature(
+                                        hourlyData.temp, prefs);
+              
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 10,
+                                      ),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          CachedNetworkImage(
+                                            imageUrl: getWeatherIcon(
+                                              hourlyData.weather[0].icon,
+                                            ),
+                                            height: 40,
+                                            width: 40,
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            hour,
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Text(
+                                            temp,
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                              Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Column(
+                                        children: [
+                                          Icon(
+                                            MdiIcons.weatherSunsetUp,
+                                            color: Colors.white,
+                                          ),
+                                          Text(
+                                            DateFormat('HH:mm').format(sunrise),
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(
+                                        width: MediaQuery.of(context).size.width /
+                                            2.5,
+                                        height:
+                                            MediaQuery.of(context).size.width /
+                                                2.5,
+                                        child: ArcProgressBar(
+                                          percentage: getCurrentPercentage(
+                                              sunrise, sunset),
+                                          arcThickness: 3,
+                                          animateFromLastPercent: true,
+                                          handleSize: 8,
+                                          backgroundColor: Colors.black12,
+                                          foregroundColor: Colors.white,
+                                        ),
+                                      ),
+                                      Column(
+                                        children: [
+                                          Icon(
+                                            MdiIcons.weatherSunsetDown,
+                                            color: Colors.white,
+                                          ),
+                                          Text(
+                                            DateFormat('HH:mm').format(sunset),
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 5),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        _buildWeatherDetail(
+                                          'Feels like',
+                                          getWeatherTemprature(weatherData.current.feelsLike, prefs),
+                                        ),
+                                        _buildWeatherDetail(
+                                          'Humidity',
+                                          '${weatherData.current.humidity}%',
+                                        ),
+                                        _buildWeatherDetail(
+                                          'Wind',
+                                          getWeatherWindSpeed(weatherData.current.windSpeed, prefs),
+                                        ),
+                                        _buildWeatherDetail(
+                                          'Pressure',
+                                          getWeatherPressure(weatherData.current.pressure, prefs),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                TextButton(
-                  onPressed: () {},
-                  child: const Text('Further Information'),
-                ),
-              ],
+                  TextButton(
+                    onPressed: () {},
+                    child: const Text('Further Information'),
+                  ),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.5,
+                  ),
+                ],
+              ),
             ),
           ),
           Positioned.fill(

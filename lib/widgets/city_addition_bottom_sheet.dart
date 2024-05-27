@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sky_cast/models/city.dart';
 import 'package:sky_cast/models/weather_data.dart';
 import 'package:sky_cast/services/weather_api_service.dart';
 import 'package:sky_cast/widgets/shadow_text.dart';
 import 'package:sky_cast/widgets/utils/weather_condition.dart';
+import 'package:sky_cast/widgets/utils/weather_temprature.dart';
 import 'package:sky_cast/widgets/weather_days_forecast.dart';
 
 class CityAdditionButtomSheet extends StatefulWidget {
@@ -53,12 +55,18 @@ class _CityAdditionButtomSheetState extends State<CityAdditionButtomSheet> {
         color: Theme.of(context).colorScheme.secondaryContainer,
         borderRadius: BorderRadius.circular(20),
       ),
+      alignment: Alignment.center,
       child: FutureBuilder<WeatherData>(
         future: _initializedFuture,
         builder: (BuildContext context, AsyncSnapshot<WeatherData> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting ||
               snapshot.data == null) {
-            return const SizedBox.shrink();
+            return LottieBuilder.asset(
+              'assets/loading.json',
+              height: MediaQuery.of(context).size.width * 0.5,
+              width: MediaQuery.of(context).size.width * 0.5,
+              fit: BoxFit.cover,
+            );
           }
           final WeatherData weatherData = snapshot.data as WeatherData;
           return Stack(
@@ -90,29 +98,28 @@ class _CityAdditionButtomSheetState extends State<CityAdditionButtomSheet> {
                         ),
                       ),
                       TextButton(
-                        onPressed: () {
-                          if (_cities.contains(widget.city.name)) {
-                            _cities.remove(widget.city.name);
-                            _prefs.setStringList('cities', _cities);
-                            Navigator.of(context).pop(
-                              {'city': widget.city, 'action': 'remove'},
-                            );
-                          } else {
-                            _cities.add(widget.city.name);
-                            _prefs.setStringList('cities', _cities);
-                            Navigator.of(context).pop(
-                              {'city': widget.city, 'action': 'add'},
-                            );
-                          }
-                          widget.action();
-                        },
-                        child: ShadowText(
-                          data: _cities.contains(widget.city.name)
-                              ? 'Remove'
-                              : 'Add',
-                          fontSize: 20,
-                        )
-                      ),
+                          onPressed: () {
+                            if (_cities.contains(widget.city.name)) {
+                              _cities.remove(widget.city.name);
+                              _prefs.setStringList('cities', _cities);
+                              Navigator.of(context).pop(
+                                {'city': widget.city, 'action': 'remove'},
+                              );
+                            } else {
+                              _cities.add(widget.city.name);
+                              _prefs.setStringList('cities', _cities);
+                              Navigator.of(context).pop(
+                                {'city': widget.city, 'action': 'add'},
+                              );
+                            }
+                            widget.action();
+                          },
+                          child: ShadowText(
+                            data: _cities.contains(widget.city.name)
+                                ? 'Remove'
+                                : 'Add',
+                            fontSize: 20,
+                          )),
                     ],
                   ),
                 ),
@@ -134,22 +141,28 @@ class _CityAdditionButtomSheetState extends State<CityAdditionButtomSheet> {
                       child: Column(
                         children: [
                           ShadowText(
-                            data:
-                                '${(weatherData.current.temp - 273.15).round()}°C',
+                            data: getWeatherTemprature(
+                              weatherData.current.temp,
+                              _prefs,
+                            ),
                             fontSize: 35,
                           ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               ShadowText(
-                                data:
-                                    'H: ${(weatherData.daily[0].temp.max - 273.15).round()}°C',
+                                data: getWeatherTemprature(
+                                  weatherData.daily[0].temp.max,
+                                  _prefs,
+                                ),
                                 fontSize: 16,
                               ),
                               const SizedBox(width: 10),
                               ShadowText(
-                                data:
-                                    'L: ${(weatherData.daily[0].temp.min - 273.15).round()}°C',
+                                data: getWeatherTemprature(
+                                  weatherData.daily[0].temp.min,
+                                  _prefs,
+                                ),
                                 fontSize: 16,
                               ),
                             ],
@@ -164,7 +177,10 @@ class _CityAdditionButtomSheetState extends State<CityAdditionButtomSheet> {
                         fontSize: 20,
                       ),
                     ),
-                    WeatherDaysForecast(weatherData: weatherData),
+                    WeatherDaysForecast(
+                      weatherData: weatherData,
+                      prefs: _prefs,
+                    ),
                   ],
                 ),
               ),

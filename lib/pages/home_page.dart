@@ -187,6 +187,7 @@ class _HomePageState extends State<HomePage> {
                     floating: true,
                     snap: true,
                     flexibleSpace: TopBar(
+                      refresh: () => setState(() {}),
                       onSearch: (value) {
                         setState(() {
                           _searchValue = value;
@@ -250,7 +251,7 @@ class _HomePageState extends State<HomePage> {
                                 backgroundColor: Theme.of(context)
                                     .colorScheme
                                     .secondaryContainer,
-                                isScrollControlled: true,    
+                                isScrollControlled: true,
                                 builder: (context) {
                                   return CityAdditionButtomSheet(
                                     city: _filteredCities[index],
@@ -272,33 +273,52 @@ class _HomePageState extends State<HomePage> {
                             }),
                         itemCount: _filteredCities.length,
                       )
-                    : ReorderableListView.builder(
+                    : ReorderableListView(
                         onReorder: (oldIndex, newIndex) {
-                          setState(() {
-                            // These two lines are workarounds for ReorderableListView problems
-                            if (newIndex > _weatherCities.length) {
-                              newIndex = _weatherCities.length;
-                            }
-                            if (oldIndex < newIndex) newIndex--;
+                          if (newIndex != 0) {
+                            setState(() {
+                              if (newIndex > _weatherCities.length) {
+                                newIndex = _weatherCities.length;
+                              }
+                              if (oldIndex < newIndex) newIndex--;
 
-                            City item = _weatherCities[oldIndex];
-                            _weatherCities.remove(item);
-                            _weatherCities.insert(newIndex, item);
-                            _prefs.setStringList(
-                              'cities',
-                              _weatherCities.map((e) => e.name).toList(),
-                            );
-                          });
+                              City item = _weatherCities[oldIndex];
+                              _weatherCities.remove(item);
+                              _weatherCities.insert(newIndex, item);
+                              _prefs.setStringList(
+                                'cities',
+                                _weatherCities.map((e) => e.name).toList(),
+                              );
+                            });
+                          }
                         },
-                        itemBuilder: (context, index) => CityWeatherInfo(
-                          key: ValueKey(index),
-                          city: _weatherCities[index],
-                          weatherCities: _weatherCities,
-                          index: index,
-                        ),
-                        itemCount: _weatherCities.length,
                         keyboardDismissBehavior:
                             ScrollViewKeyboardDismissBehavior.onDrag,
+                        children: _weatherCities
+                            .map(
+                              (city) => GestureDetector(
+                                key: ValueKey(city.name),
+                                onLongPress: !city.isMyLocation ? null : () {},
+                                child: CityWeatherInfo(
+                                  city: city,
+                                  weatherCities: _weatherCities,
+                                  index: _weatherCities.indexOf(city),
+                                  onDelete: () {
+                                    setState(() {
+                                      _weatherCities.removeAt(
+                                          _weatherCities.indexOf(city));
+                                      _prefs.setStringList(
+                                        'cities',
+                                        _weatherCities
+                                            .map((e) => e.name)
+                                            .toList(),
+                                      );
+                                    });
+                                  },
+                                ),
+                              ),
+                            )
+                            .toList(),
                       ),
               ),
             ),

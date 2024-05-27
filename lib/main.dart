@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sky_cast/models/city.dart';
 import 'package:sky_cast/models/weather_data.dart';
 import 'package:sky_cast/pages/cities_page.dart';
@@ -57,12 +58,14 @@ class SkyCast extends StatelessWidget {
           final arguments = settings.arguments as Map<String, dynamic>;
           final weatherData = arguments['weatherData'] as WeatherData;
           final city = arguments['city'] as City;
+          final prefs = arguments['prefs'] as SharedPreferences;
           return PageRouteBuilder(
             settings: settings,
             pageBuilder: (context, firstAnimation, secondAnimation) =>
                 CityWeatherDetailPage(
               weatherData: weatherData,
               city: city,
+              prefs: prefs,
             ),
             transitionDuration: const Duration(milliseconds: 200),
             reverseTransitionDuration: const Duration(milliseconds: 200),
