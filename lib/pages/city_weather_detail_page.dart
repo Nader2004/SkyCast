@@ -14,16 +14,26 @@ import 'package:sky_cast/widgets/utils/weather_pressure.dart';
 import 'package:sky_cast/widgets/utils/weather_temprature.dart';
 import 'package:sky_cast/widgets/utils/weather_wind_speed.dart';
 
+/// A page that displays detailed weather information for a specific city.
 class CityWeatherDetailPage extends StatelessWidget {
+  /// The weather data to display.
   final WeatherData weatherData;
-  final City city;
-  final SharedPreferences prefs;
-  const CityWeatherDetailPage(
-      {super.key,
-      required this.weatherData,
-      required this.city,
-      required this.prefs});
 
+  /// The city for which the weather data is being displayed.
+  final City city;
+
+  /// The shared preferences used to retrieve user settings.
+  final SharedPreferences prefs;
+
+  /// Creates a [CityWeatherDetailPage] widget.
+  const CityWeatherDetailPage({
+    super.key,
+    required this.weatherData,
+    required this.city,
+    required this.prefs,
+  });
+
+  /// Builds a widget that displays a weather detail.
   Widget _buildWeatherDetail(String title, String value) {
     return Column(
       children: [
@@ -46,6 +56,7 @@ class CityWeatherDetailPage extends StatelessWidget {
     );
   }
 
+  /// Calculates the current percentage of daylight.
   double getCurrentPercentage(DateTime sunrise, DateTime sunset) {
     final DateTime now = DateTime.now();
     final int totalMinutes = sunset.difference(sunrise).inMinutes;
@@ -67,11 +78,9 @@ class CityWeatherDetailPage extends StatelessWidget {
     final DateTime now = DateTime.now();
 
     final Duration totalDaylight = sunset.difference(sunrise);
-
     final Duration sinceSunrise = now.difference(sunrise);
 
     double percentage = sinceSunrise.inMinutes / totalDaylight.inMinutes;
-
     percentage = percentage.clamp(0, 1);
 
     return Scaffold(
@@ -162,7 +171,8 @@ class CityWeatherDetailPage extends StatelessWidget {
                             ),
                           ),
                           margin: EdgeInsets.symmetric(
-                            horizontal: MediaQuery.of(context).size.width * 0.04,
+                            horizontal:
+                                MediaQuery.of(context).size.width * 0.04,
                           ),
                           padding: const EdgeInsets.all(10),
                           child: Column(
@@ -170,24 +180,25 @@ class CityWeatherDetailPage extends StatelessWidget {
                             children: [
                               SizedBox(
                                 width: MediaQuery.of(context).size.width,
-                                height: MediaQuery.of(context).size.height * 0.18,
+                                height:
+                                    MediaQuery.of(context).size.height * 0.18,
                                 child: ListView.builder(
                                   scrollDirection: Axis.horizontal,
                                   itemCount: weatherData.hourly.length,
                                   itemBuilder: (context, index) {
                                     final Hourly hourlyData =
                                         weatherData.hourly[index];
-              
+
                                     final DateTime date =
                                         DateTime.fromMillisecondsSinceEpoch(
                                             hourlyData.dt * 1000);
-              
+
                                     final String hour =
                                         DateFormat('HH').format(date);
-              
+
                                     final String temp = getWeatherTemprature(
                                         hourlyData.temp, prefs);
-              
+
                                     return Padding(
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 10,
@@ -230,7 +241,8 @@ class CityWeatherDetailPage extends StatelessWidget {
                                 children: [
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
                                     children: [
                                       Column(
                                         children: [
@@ -249,8 +261,9 @@ class CityWeatherDetailPage extends StatelessWidget {
                                         ],
                                       ),
                                       SizedBox(
-                                        width: MediaQuery.of(context).size.width /
-                                            2.5,
+                                        width:
+                                            MediaQuery.of(context).size.width /
+                                                2.5,
                                         height:
                                             MediaQuery.of(context).size.width /
                                                 2.5,
@@ -290,7 +303,9 @@ class CityWeatherDetailPage extends StatelessWidget {
                                       children: [
                                         _buildWeatherDetail(
                                           'Feels like',
-                                          getWeatherTemprature(weatherData.current.feelsLike, prefs),
+                                          getWeatherTemprature(
+                                              weatherData.current.feelsLike,
+                                              prefs),
                                         ),
                                         _buildWeatherDetail(
                                           'Humidity',
@@ -298,11 +313,15 @@ class CityWeatherDetailPage extends StatelessWidget {
                                         ),
                                         _buildWeatherDetail(
                                           'Wind',
-                                          getWeatherWindSpeed(weatherData.current.windSpeed, prefs),
+                                          getWeatherWindSpeed(
+                                              weatherData.current.windSpeed,
+                                              prefs),
                                         ),
                                         _buildWeatherDetail(
                                           'Pressure',
-                                          getWeatherPressure(weatherData.current.pressure, prefs),
+                                          getWeatherPressure(
+                                              weatherData.current.pressure,
+                                              prefs),
                                         ),
                                       ],
                                     ),

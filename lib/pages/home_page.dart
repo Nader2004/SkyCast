@@ -9,6 +9,7 @@ import 'package:sky_cast/widgets/city_addition_bottom_sheet.dart';
 import 'package:sky_cast/widgets/city_weather_info.dart';
 import 'package:sky_cast/widgets/top_bar.dart';
 
+/// The main page of the SkyCast app, displaying weather information for cities.
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -18,7 +19,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late SharedPreferences _prefs;
-
   final FocusNode _focusNode = FocusNode();
   final List<City> _weatherCities = [];
 
@@ -33,6 +33,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
   }
 
+  /// Initializes shared preferences and loads saved cities.
   Future<void> _initPrefs() async {
     _prefs = await SharedPreferences.getInstance();
     if (_prefs.containsKey('cities')) {
@@ -52,6 +53,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  /// Handles location permission requests.
   Future<bool> _handleLocationPermission() async {
     bool serviceEnabled;
     LocationPermission permission;
@@ -90,6 +92,7 @@ class _HomePageState extends State<HomePage> {
     return true;
   }
 
+  /// Gets the current position of the device and returns a [City] object.
   Future<City?> _getCurrentPosition() async {
     final hasPermission = await _handleLocationPermission();
     if (!hasPermission) return null;
@@ -107,12 +110,14 @@ class _HomePageState extends State<HomePage> {
     return city;
   }
 
+  /// Gets the address from the given latitude and longitude.
   Future<Placemark> _getAddressFromLatLng(Position position) async {
     final List<Placemark> placemarks =
         await placemarkFromCoordinates(position.latitude, position.longitude);
     return placemarks.first;
   }
 
+  /// Listener for the focus node to update the UI based on focus state.
   void _focusListener() {
     if (_focusNode.hasFocus) {
       setState(() {
@@ -125,6 +130,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  /// Highlights occurrences of the search query in the given source string.
   List<TextSpan> highlightOccurrences(String source, String query) {
     if (query.isEmpty) {
       return [TextSpan(text: source)];
@@ -163,7 +169,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light
-          .copyWith(statusBarColor: Theme.of(context).colorScheme.background),
+          .copyWith(statusBarColor: Theme.of(context).colorScheme.surface),
       child: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: Container(

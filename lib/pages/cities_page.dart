@@ -3,9 +3,15 @@ import 'package:sky_cast/models/city.dart';
 import 'package:sky_cast/widgets/city_weather_page_info.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
+/// A page that displays weather information for multiple cities using a page view.
 class CitiesPage extends StatefulWidget {
+  /// The initial index of the page view.
   final int index;
+
+  /// The list of cities for which weather information is displayed.
   final List<City> weatherCities;
+
+  /// Creates a [CitiesPage] widget.
   const CitiesPage({
     super.key,
     required this.index,

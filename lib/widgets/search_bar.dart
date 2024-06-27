@@ -1,14 +1,23 @@
 import 'package:flutter/material.dart';
 
+/// A custom search bar widget for searching cities.
 class SearchBar extends StatelessWidget {
+  /// Callback function when the search input changes.
   final Function(String) onSearch;
+
+  /// Focus node for managing focus state of the search bar.
   final FocusNode focusNode;
+
+  /// Controller for managing the text input of the search bar.
   final TextEditingController controller;
-  const SearchBar(
-      {super.key,
-      required this.onSearch,
-      required this.focusNode,
-      required this.controller});
+
+  /// Creates a [SearchBar] widget.
+  const SearchBar({
+    super.key,
+    required this.onSearch,
+    required this.focusNode,
+    required this.controller,
+  });
 
   @override
   Widget build(BuildContext context) {

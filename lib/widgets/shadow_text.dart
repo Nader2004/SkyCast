@@ -1,10 +1,20 @@
 import 'package:flutter/material.dart';
 
+/// A widget that displays text with a shadow effect.
 class ShadowText extends StatelessWidget {
+  /// The text to display.
   final String data;
+
+  /// The font size of the text.
   final double? fontSize;
+
+  /// The font weight of the text.
   final FontWeight? fontWeight;
+
+  /// The text alignment.
   final TextAlign? textAlign;
+
+  /// Creates a [ShadowText] widget.
   const ShadowText({
     super.key,
     required this.data,

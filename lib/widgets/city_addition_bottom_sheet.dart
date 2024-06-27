@@ -9,11 +9,21 @@ import 'package:sky_cast/widgets/utils/weather_condition.dart';
 import 'package:sky_cast/widgets/utils/weather_temprature.dart';
 import 'package:sky_cast/widgets/weather_days_forecast.dart';
 
+/// A bottom sheet widget that displays weather information for a city
+/// and allows the user to add or remove the city from their list.
 class CityAdditionButtomSheet extends StatefulWidget {
+  /// The city for which to display weather information.
   final City city;
+
+  /// Callback function to perform an action when the city is added or removed.
   final VoidCallback action;
-  const CityAdditionButtomSheet(
-      {super.key, required this.city, required this.action});
+
+  /// Creates a [CityAdditionButtomSheet] widget.
+  const CityAdditionButtomSheet({
+    super.key,
+    required this.city,
+    required this.action,
+  });
 
   @override
   State<CityAdditionButtomSheet> createState() =>
@@ -32,6 +42,7 @@ class _CityAdditionButtomSheetState extends State<CityAdditionButtomSheet> {
     super.initState();
   }
 
+  /// Initializes shared preferences and loads the list of saved cities.
   void initPrefs() async {
     _prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -39,6 +50,7 @@ class _CityAdditionButtomSheetState extends State<CityAdditionButtomSheet> {
     });
   }
 
+  /// Fetches weather data for the specified city.
   void fetchWeatherData() async {
     _initializedFuture = WeatherApiService().fetchWeather(
       widget.city.lat,
@@ -98,28 +110,29 @@ class _CityAdditionButtomSheetState extends State<CityAdditionButtomSheet> {
                         ),
                       ),
                       TextButton(
-                          onPressed: () {
-                            if (_cities.contains(widget.city.name)) {
-                              _cities.remove(widget.city.name);
-                              _prefs.setStringList('cities', _cities);
-                              Navigator.of(context).pop(
-                                {'city': widget.city, 'action': 'remove'},
-                              );
-                            } else {
-                              _cities.add(widget.city.name);
-                              _prefs.setStringList('cities', _cities);
-                              Navigator.of(context).pop(
-                                {'city': widget.city, 'action': 'add'},
-                              );
-                            }
-                            widget.action();
-                          },
-                          child: ShadowText(
-                            data: _cities.contains(widget.city.name)
-                                ? 'Remove'
-                                : 'Add',
-                            fontSize: 20,
-                          )),
+                        onPressed: () {
+                          if (_cities.contains(widget.city.name)) {
+                            _cities.remove(widget.city.name);
+                            _prefs.setStringList('cities', _cities);
+                            Navigator.of(context).pop(
+                              {'city': widget.city, 'action': 'remove'},
+                            );
+                          } else {
+                            _cities.add(widget.city.name);
+                            _prefs.setStringList('cities', _cities);
+                            Navigator.of(context).pop(
+                              {'city': widget.city, 'action': 'add'},
+                            );
+                          }
+                          widget.action();
+                        },
+                        child: ShadowText(
+                          data: _cities.contains(widget.city.name)
+                              ? 'Remove'
+                              : 'Add',
+                          fontSize: 20,
+                        ),
+                      ),
                     ],
                   ),
                 ),

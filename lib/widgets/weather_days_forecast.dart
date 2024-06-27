@@ -6,11 +6,20 @@ import 'package:sky_cast/widgets/utils/weather_icon.dart';
 import 'package:sky_cast/widgets/utils/weather_temprature.dart';
 import 'package:sky_cast/widgets/utils/wetather_days.dart';
 
+/// A widget that displays the weather forecast for multiple days.
 class WeatherDaysForecast extends StatelessWidget {
+  /// The weather data for the forecast.
   final WeatherData weatherData;
+
+  /// Shared preferences for storing user settings.
   final SharedPreferences prefs;
-  const WeatherDaysForecast(
-      {super.key, required this.weatherData, required this.prefs});
+
+  /// Creates a [WeatherDaysForecast] widget.
+  const WeatherDaysForecast({
+    super.key,
+    required this.weatherData,
+    required this.prefs,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -25,11 +34,13 @@ class WeatherDaysForecast extends StatelessWidget {
       ),
       child: Wrap(
         children: [
+          // Iterate through the daily weather data and build the forecast items.
           for (final weather in weatherData.daily)
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(
                 children: [
+                  // Display weather icon using CachedNetworkImage.
                   CachedNetworkImage(
                     imageUrl: getWeatherIcon(
                       weather.weather[0].icon,
@@ -37,6 +48,7 @@ class WeatherDaysForecast extends StatelessWidget {
                     height: 50,
                     width: 50,
                   ),
+                  // Display the name of the day.
                   Text(
                     getWeatherDayName(weather),
                     style: const TextStyle(
@@ -45,6 +57,7 @@ class WeatherDaysForecast extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  // Display the temperature.
                   Text(
                     getWeatherTemprature(
                       weather.temp.day,

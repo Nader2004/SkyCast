@@ -8,11 +8,15 @@ import 'package:sky_cast/pages/city_weather_detail_page.dart';
 
 import 'pages/home_page.dart';
 
+/// The main entry point of the application.
 void main() async {
+  // Load environment variables from the specified file.
   await dotenv.load(fileName: "weather_api.env");
+  // Run the SkyCast application.
   runApp(const SkyCast());
 }
 
+/// The SkyCast application widget.
 class SkyCast extends StatelessWidget {
   const SkyCast({super.key});
 
@@ -28,9 +32,11 @@ class SkyCast extends StatelessWidget {
         useMaterial3: true,
       ),
       routes: {
+        // Home route
         '/': (context) => const HomePage(),
       },
       onGenerateRoute: (settings) {
+        // Route for the CitiesPage
         if (settings.name == '/cities') {
           final arguments = settings.arguments as Map<String, dynamic>;
           final index = arguments['index'] as int;
@@ -54,6 +60,7 @@ class SkyCast extends StatelessWidget {
           );
         }
 
+        // Route for the CityWeatherDetailPage
         if (settings.name == '/details') {
           final arguments = settings.arguments as Map<String, dynamic>;
           final weatherData = arguments['weatherData'] as WeatherData;

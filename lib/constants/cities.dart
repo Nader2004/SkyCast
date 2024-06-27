@@ -1,5 +1,6 @@
 import 'package:sky_cast/models/city.dart';
 
+/// List of constant cities with their respective coordinates and country.
 const List<City> cities = [
   City(name: 'Abidjan', lon: -4.00167, lat: 5.35444, country: 'Ivory Coast'),
   City(

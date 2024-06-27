@@ -6,17 +6,28 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'search_bar.dart';
 
+/// A top bar widget that includes a search bar and settings options.
 class TopBar extends StatefulWidget {
+  /// Callback to refresh the parent widget.
   final VoidCallback refresh;
+
+  /// Callback for search input.
   final Function(String) onSearch;
+
+  /// Focus node for the search bar.
   final FocusNode focusNode;
+
+  /// Indicates whether the search bar is ready to accept input.
   final bool isReadyToType;
-  const TopBar(
-      {super.key,
-      required this.refresh,
-      required this.onSearch,
-      required this.focusNode,
-      required this.isReadyToType});
+
+  /// Creates a [TopBar] widget.
+  const TopBar({
+    super.key,
+    required this.refresh,
+    required this.onSearch,
+    required this.focusNode,
+    required this.isReadyToType,
+  });
 
   @override
   State<TopBar> createState() => _TopBarState();
@@ -36,6 +47,7 @@ class _TopBarState extends State<TopBar> {
     super.initState();
   }
 
+  /// Initialize the shared preferences.
   void initPrefs() async {
     _prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -44,6 +56,7 @@ class _TopBarState extends State<TopBar> {
     });
   }
 
+  /// Builds a single unit selection tile.
   Widget _buildSingleUnitTile({
     required String title,
     required String option1,
@@ -86,6 +99,7 @@ class _TopBarState extends State<TopBar> {
     );
   }
 
+  /// Opens a bottom sheet for unit selection.
   void openUnitsBottomSheet() {
     showModalBottomSheet(
         context: context,

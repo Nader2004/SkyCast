@@ -8,12 +8,21 @@ import 'package:sky_cast/services/weather_api_service.dart';
 import 'package:sky_cast/widgets/utils/weather_condition.dart';
 import 'package:sky_cast/widgets/utils/weather_temprature.dart';
 
+/// A widget that displays the weather information for a specific city.
 class CityWeatherInfo extends StatefulWidget {
+  /// The city for which to display weather information.
   final City city;
+
+  /// A list of cities with weather information.
   final List<City> weatherCities;
+
+  /// The index of the current city in the list of weather cities.
   final int index;
+
+  /// Callback function to handle city deletion.
   final VoidCallback onDelete;
 
+  /// Creates a [CityWeatherInfo] widget.
   const CityWeatherInfo({
     super.key,
     required this.city,
@@ -37,10 +46,12 @@ class _CityWeatherInfoState extends State<CityWeatherInfo> {
     super.initState();
   }
 
+  /// Initializes shared preferences.
   void initPrefs() async {
     _prefs = await SharedPreferences.getInstance();
   }
 
+  /// Fetches weather data for the specified city.
   void fetchWeatherData() async {
     _initializedFuture = WeatherApiService().fetchWeather(
       widget.city.lat,
@@ -62,115 +73,114 @@ class _CityWeatherInfoState extends State<CityWeatherInfo> {
         borderRadius: BorderRadius.circular(20),
       ),
       child: FutureBuilder<WeatherData>(
-          future: _initializedFuture,
-          builder: (BuildContext context, AsyncSnapshot<WeatherData> snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting ||
-                snapshot.data == null) {
-              return Shimmer.fromColors(
-                baseColor: Colors.grey[400]!,
-                highlightColor: Colors.grey[100]!,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.secondaryContainer,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-              );
-            }
-            final WeatherData weatherData = snapshot.data as WeatherData;
-            return GestureDetector(
-              onTap: () => Navigator.of(context).pushNamed(
-                '/cities',
-                arguments: {
-                  'index': widget.index,
-                  'weatherCities': widget.weatherCities,
-                },
-              ),
-              child: Slidable(
-                key: ValueKey(widget.city.name),
-                endActionPane: widget.city.isMyLocation
-                    ? null
-                    : ActionPane(
-                        dismissible: DismissiblePane(
-                          onDismissed: () => widget.onDelete(),
-                        ),
-                        motion: const BehindMotion(),
-                        children: [
-                          SlidableAction(
-                            onPressed: (context) => widget.onDelete(),
-                            backgroundColor: const Color(0xFFFE4A49),
-                            foregroundColor: Colors.white,
-                            icon: Icons.delete,
-                            label: 'Delete',
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                        ],
-                      ),
-                child: Stack(
-                  children: [
-                    Opacity(
-                      opacity: 0.9,
-                      child: ClipRRect(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(20)),
-                        child: Container(
-                          color: Colors.grey.withOpacity(0.3),
-                          child: getWeatherCondition(weatherData),
-                        ),
-                      ),
-                    ),
-                    Positioned.fill(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                widget.city.isMyLocation
-                                    ? const Text(
-                                        'My Location',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 22,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      )
-                                    : const SizedBox.shrink(),
-                                Text(
-                                  widget.city.name,
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize:
-                                        widget.city.isMyLocation ? 14 : 26,
-                                    fontWeight: widget.city.isMyLocation
-                                        ? FontWeight.w500
-                                        : FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Text(
-                              getWeatherTemprature(
-                                  weatherData.current.temp, _prefs),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 26,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+        future: _initializedFuture,
+        builder: (BuildContext context, AsyncSnapshot<WeatherData> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting ||
+              snapshot.data == null) {
+            return Shimmer.fromColors(
+              baseColor: Colors.grey[400]!,
+              highlightColor: Colors.grey[100]!,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.secondaryContainer,
+                  borderRadius: BorderRadius.circular(20),
                 ),
               ),
             );
-          }),
+          }
+          final WeatherData weatherData = snapshot.data as WeatherData;
+          return GestureDetector(
+            onTap: () => Navigator.of(context).pushNamed(
+              '/cities',
+              arguments: {
+                'index': widget.index,
+                'weatherCities': widget.weatherCities,
+              },
+            ),
+            child: Slidable(
+              key: ValueKey(widget.city.name),
+              endActionPane: widget.city.isMyLocation
+                  ? null
+                  : ActionPane(
+                      dismissible: DismissiblePane(
+                        onDismissed: () => widget.onDelete(),
+                      ),
+                      motion: const BehindMotion(),
+                      children: [
+                        SlidableAction(
+                          onPressed: (context) => widget.onDelete(),
+                          backgroundColor: const Color(0xFFFE4A49),
+                          foregroundColor: Colors.white,
+                          icon: Icons.delete,
+                          label: 'Delete',
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ],
+                    ),
+              child: Stack(
+                children: [
+                  Opacity(
+                    opacity: 0.9,
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.all(Radius.circular(20)),
+                      child: Container(
+                        color: Colors.grey.withOpacity(0.3),
+                        child: getWeatherCondition(weatherData),
+                      ),
+                    ),
+                  ),
+                  Positioned.fill(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              widget.city.isMyLocation
+                                  ? const Text(
+                                      'My Location',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    )
+                                  : const SizedBox.shrink(),
+                              Text(
+                                widget.city.name,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: widget.city.isMyLocation ? 14 : 26,
+                                  fontWeight: widget.city.isMyLocation
+                                      ? FontWeight.w500
+                                      : FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Text(
+                            getWeatherTemprature(
+                                weatherData.current.temp, _prefs),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 26,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }
