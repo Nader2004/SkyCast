@@ -37,7 +37,7 @@ class _TopBarState extends State<TopBar> {
   late SharedPreferences _prefs;
   final TextEditingController _controller = TextEditingController();
   String searchValue = '';
-  String _selectedTemperatureUnit = 'Celcius';
+  String _selectedTemperatureUnit = 'Celsius';
   String _selectedWindSpeedUnit = 'km/h';
   String _selectedPressureUnit = 'hPa';
 
@@ -52,7 +52,7 @@ class _TopBarState extends State<TopBar> {
     _prefs = await SharedPreferences.getInstance();
     setState(() {
       _selectedTemperatureUnit =
-          _prefs.getString('temperatureUnit') ?? 'Celcius';
+          _prefs.getString('temperatureUnit') ?? 'Celsius';
     });
   }
 
@@ -118,19 +118,19 @@ class _TopBarState extends State<TopBar> {
                   children: [
                     _buildSingleUnitTile(
                       title: 'Temperature Unit',
-                      option1: 'Celcius',
+                      option1: 'Celsius',
                       option2: 'Fahrenheit',
                       onTap1: () {
-                        _prefs.setString('temperatureUnit', 'Celcius');
+                        _prefs.setString('temperatureUnit', 'Celsius');
                         setModalState(
-                            () => _selectedTemperatureUnit = 'Celcius');
+                            () => _selectedTemperatureUnit = 'Celsius');
                       },
                       onTap2: () {
                         _prefs.setString('temperatureUnit', 'Fahrenheit');
                         setModalState(
                             () => _selectedTemperatureUnit = 'Fahrenheit');
                       },
-                      expression1: _selectedTemperatureUnit != 'Celcius',
+                      expression1: _selectedTemperatureUnit != 'Celsius',
                       expression2: _selectedTemperatureUnit != 'Fahrenheit',
                     ),
                     _buildSingleUnitTile(
@@ -185,13 +185,13 @@ class _TopBarState extends State<TopBar> {
               : PullDownButton(
                   itemBuilder: (context) => [
                     PullDownMenuItem(
-                      title: 'Celcius',
+                      title: 'Celsius',
                       onTap: () {
                         widget.refresh();
-                        _prefs.setString('temperatureUnit', 'Celcius');
-                        setState(() => _selectedTemperatureUnit = 'Celcius');
+                        _prefs.setString('temperatureUnit', 'Celsius');
+                        setState(() => _selectedTemperatureUnit = 'Celsius');
                       },
-                      icon: _selectedTemperatureUnit != 'Celcius'
+                      icon: _selectedTemperatureUnit != 'Celsius'
                           ? null
                           : CupertinoIcons.check_mark_circled,
                     ),
