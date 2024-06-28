@@ -13,6 +13,7 @@ import 'package:sky_cast/widgets/utils/weather_icon.dart';
 import 'package:sky_cast/widgets/utils/weather_pressure.dart';
 import 'package:sky_cast/widgets/utils/weather_temprature.dart';
 import 'package:sky_cast/widgets/utils/weather_wind_speed.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// A page that displays detailed weather information for a specific city.
 class CityWeatherDetailPage extends StatelessWidget {
@@ -32,6 +33,12 @@ class CityWeatherDetailPage extends StatelessWidget {
     required this.city,
     required this.prefs,
   });
+
+  Future<void> _launchUrl(Uri url) async {
+    if (!await launchUrl(url)) {
+      throw Exception('Could not launch $url');
+    }
+  }
 
   /// Builds a widget that displays a weather detail.
   Widget _buildWeatherDetail(String title, String value) {
@@ -335,7 +342,10 @@ class CityWeatherDetailPage extends StatelessWidget {
                     ),
                   ),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      final Uri url = Uri.parse('http://localhost/weatherWeb%203/homePage.php');
+                      _launchUrl(url);
+                    },
                     child: const Text('Further Information'),
                   ),
                   SizedBox(
