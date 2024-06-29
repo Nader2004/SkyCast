@@ -5,6 +5,8 @@ import 'package:sky_cast/models/city.dart';
 import 'package:sky_cast/models/weather_data.dart';
 import 'package:sky_cast/pages/cities_page.dart';
 import 'package:sky_cast/pages/city_weather_detail_page.dart';
+import 'package:sky_cast/services/connectivity_service.dart';
+import 'package:sky_cast/widgets/connectivity_widget.dart';
 
 import 'pages/home_page.dart';
 
@@ -12,8 +14,14 @@ import 'pages/home_page.dart';
 void main() async {
   // Load environment variables from the specified file.
   await dotenv.load(fileName: "weather_api.env");
+  final connectivityService = ConnectivityService();
   // Run the SkyCast application.
-  runApp(const SkyCast());
+  runApp(
+    ConnectivityProvider(
+      connectivityService: connectivityService,
+      child: const SkyCast(),
+    ),
+  );
 }
 
 /// The SkyCast application widget.

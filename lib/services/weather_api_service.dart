@@ -1,33 +1,59 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart'; // Import foundation for compute
 import 'package:http/http.dart' as http;
+import 'package:sky_cast/models/city.dart';
 import 'package:sky_cast/models/weather_data.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-/// A service class that interacts with the OpenWeatherMap API to fetch weather data.
-class WeatherApiService {
-  /// The base URL for the OpenWeatherMap API.
-  final String baseUrl = 'https://api.openweathermap.org/data/3.0/onecall';
+// Top-level function for parsing weather data
+WeatherData parseWeatherData(String responseBody) {
+  return WeatherData.fromJson(json.decode(responseBody));
+}
 
-  /// The API key for authenticating requests to the OpenWeatherMap API.
+// Top-level function for parsing city data
+List<City> parseCityData(String responseBody) {
+  final body = json.decode(responseBody) as List;
+  return body.map((city) => City.fromJson(city)).toList();
+}
+
+class WeatherApiService {
+  final String baseUrl = 'https://api.openweathermap.org/data/3.0/onecall';
+  final String baseCityQueryUrl =
+      'http://api.openweathermap.org/geo/1.0/direct';
   final String apiKey = dotenv.env['WEATHER_API_KEY']!;
 
-  /// Fetches weather data for the given latitude and longitude.
-  ///
-  /// The [lat] parameter is the latitude of the location.
-  /// The [lon] parameter is the longitude of the location.
-  ///
-  /// Returns a [WeatherData] object containing the weather data for the specified location.
-  ///
-  /// Throws an [Exception] if the request fails.
-  Future<WeatherData> fetchWeather(double lat, double lon) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl?lat=$lat&lon=$lon&appid=$apiKey'),
-    );
+  Future<WeatherData?> fetchWeather(double lat, double lon) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl?lat=$lat&lon=$lon&appid=$apiKey'),
+      );
 
-    if (response.statusCode == 200) {
-      return WeatherData.fromJson(json.decode(response.body));
-    } else {
-      throw Exception('Failed to load weather data');
+      if (response.statusCode == 200) {
+        // Use compute to parse weather data in a separate isolate
+        return compute(parseWeatherData, response.body);
+      } else {
+        throw Exception('Failed to load weather data');
+      }
+    } catch (e) {
+      debugPrint('Failed to connect to the API');
+      return null;
+    }
+  }
+
+  Future<List<City>> fetchCity(String cityName) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseCityQueryUrl?q=$cityName&limit=10&appid=$apiKey'),
+      );
+      if (response.statusCode == 200) {
+        // Use compute to parse city data in a separate isolate
+        return compute(parseCityData, response.body);
+      } else {
+        throw Exception('Failed to load city data');
+      }
+    } catch (e) {
+      debugPrint('Failed to connect to the API');
+      return [];
     }
   }
 }

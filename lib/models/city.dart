@@ -1,29 +1,75 @@
-/// A class representing a city with its geographical and location details.
+import 'package:sky_cast/constants/country_codes.dart';
+
 class City {
-  /// The name of the city.
   final String name;
-
-  /// The longitude coordinate of the city.
   final double lon;
-
-  /// The latitude coordinate of the city.
   final double lat;
-
-  /// The country where the city is located.
   final String country;
-
-  /// Indicates if this city is the user's current location.
   final bool isMyLocation;
+  final int? orderIndex;
 
-  /// Creates a [City] object.
-  ///
-  /// The [name], [lon], [lat], and [country] parameters are required and must not be null.
-  /// The [isMyLocation] parameter is optional and defaults to `false`.
   const City({
     required this.name,
     required this.lon,
     required this.lat,
     required this.country,
     this.isMyLocation = false,
+    this.orderIndex,
   });
+
+  City setIsMyLocation(bool isMyLocation) {
+    return City(
+      name: name,
+      lon: lon,
+      lat: lat,
+      country: country,
+      isMyLocation: isMyLocation,
+    );
+  }
+
+  factory City.fromJson(Map<String, dynamic> json) {
+    return City(
+      name: json['name'],
+      lon: json['lon'],
+      lat: json['lat'],
+      country: countryCodes
+          .where((x) => json['country'] == x['code'])
+          .first['name'] as String,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'lon': lon,
+      'lat': lat,
+      'country': countryCodes.where((x) => x['name'] == country).first['code']
+          as String,
+      'isMyLocation': isMyLocation ? 1 : 0,
+      'orderIndex': orderIndex,
+    };
+  }
+
+  City copyWith({
+    String? name,
+    double? lon,
+    double? lat,
+    String? country,
+    bool? isMyLocation,
+    int? orderIndex,
+  }) {
+    return City(
+      name: name ?? this.name,
+      lon: lon ?? this.lon,
+      lat: lat ?? this.lat,
+      country: country ?? this.country,
+      isMyLocation: isMyLocation ?? this.isMyLocation,
+      orderIndex: orderIndex ?? this.orderIndex,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'City{name: $name, lon: $lon, lat: $lat, country: $country, isMyLocation: $isMyLocation, orderIndex: $orderIndex}';
+  }
 }

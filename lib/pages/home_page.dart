@@ -1,12 +1,17 @@
+import 'dart:async';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sky_cast/constants/cities.dart';
 import 'package:sky_cast/models/city.dart';
+import 'package:sky_cast/services/database/city_database_service.dart';
+import 'package:sky_cast/services/weather_api_service.dart';
 import 'package:sky_cast/widgets/city_addition_bottom_sheet.dart';
 import 'package:sky_cast/widgets/city_weather_info.dart';
+import 'package:sky_cast/widgets/connectivity_widget.dart';
+import 'package:sky_cast/widgets/no_internet_widget.dart';
 import 'package:sky_cast/widgets/top_bar.dart';
 
 /// The main page of the SkyCast app, displaying weather information for cities.
@@ -18,39 +23,58 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late SharedPreferences _prefs;
+  late CityDatabaseService _cityDatabaseService;
+  late StreamSubscription<ConnectivityResult> _subscription;
+  ConnectivityResult _connectivityResult = ConnectivityResult.none;
   final FocusNode _focusNode = FocusNode();
   final List<City> _weatherCities = [];
 
   bool _readyToType = false;
+  bool _openAppSettingsForPermission = false;
   String _searchValue = '';
   List<City> _filteredCities = [];
 
   @override
   void initState() {
-    _initPrefs();
+    _initDBAndServices();
     _focusNode.addListener(_focusListener);
     super.initState();
   }
 
-  /// Initializes shared preferences and loads saved cities.
-  Future<void> _initPrefs() async {
-    _prefs = await SharedPreferences.getInstance();
-    if (_prefs.containsKey('cities')) {
-      Map<String, City> cityMap = {for (City city in cities) city.name: city};
-      for (String cityName in _prefs.getStringList('cities')!) {
-        City? city = cityMap[cityName];
-        if (city != null) {
-          _weatherCities.add(city);
-        }
-      }
-    }
-    final City? city = await _getCurrentPosition();
-    if (city != null) {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final connectivityService =
+        ConnectivityProvider.of(context)!.connectivityService;
+    _subscription = connectivityService.connectivityStream.listen((result) {
       setState(() {
-        _weatherCities.insert(0, city);
+        _connectivityResult = result;
+      });
+    });
+  }
+
+  /// database and loads saved cities.
+  Future<void> _initDBAndServices() async {
+    _cityDatabaseService = CityDatabaseService.instance;
+
+    // Await the results of Future.wait
+    final results = await Future.wait([
+      _getCurrentPosition(),
+      _cityDatabaseService.readAll(),
+    ]);
+
+    final City? currentPositionCity = results[0] as City?;
+    final List<City> citiesFromDatabase = results[1] as List<City>;
+
+    if (currentPositionCity != null) {
+      setState(() {
+        _weatherCities.insert(0, currentPositionCity);
       });
     }
+
+    setState(() {
+      _weatherCities.addAll(citiesFromDatabase);
+    });
   }
 
   /// Handles location permission requests.
@@ -66,6 +90,7 @@ class _HomePageState extends State<HomePage> {
               'Location services are disabled. Please enable the services'),
         ),
       );
+      setState(() => _openAppSettingsForPermission = true);
       return false;
     }
     permission = await Geolocator.checkPermission();
@@ -77,6 +102,7 @@ class _HomePageState extends State<HomePage> {
             content: Text('Location permissions are denied'),
           ),
         );
+        setState(() => _openAppSettingsForPermission = true);
         return false;
       }
     }
@@ -87,6 +113,7 @@ class _HomePageState extends State<HomePage> {
               'Location permissions are permanently denied, we cannot request permissions.'),
         ),
       );
+      setState(() => _openAppSettingsForPermission = true);
       return false;
     }
     return true;
@@ -106,6 +133,7 @@ class _HomePageState extends State<HomePage> {
       lon: position.longitude,
       lat: position.latitude,
       isMyLocation: true,
+      orderIndex: 0,
     );
     return city;
   }
@@ -158,10 +186,39 @@ class _HomePageState extends State<HomePage> {
     return spans;
   }
 
+  Future<void> getCities(String value) async {
+    if (value.isEmpty) {
+      setState(() {
+        _searchValue = '';
+        _filteredCities = [];
+      });
+    } else {
+      final List<City> citiesFromApi =
+          await WeatherApiService().fetchCity(value);
+      Map<String, City> uniqueCityMap = {};
+
+      /// filter out duplicate cities
+      for (City city in citiesFromApi) {
+        String uniqueKey = "${city.name},${city.country}";
+        if (!uniqueCityMap.containsKey(uniqueKey)) {
+          uniqueCityMap[uniqueKey] = city;
+        }
+      }
+
+      final List<City> uniqueCities = uniqueCityMap.values.toList();
+      setState(() {
+        _searchValue = value;
+        _filteredCities = uniqueCities;
+      });
+    }
+  }
+
   @override
   void dispose() {
     _focusNode.removeListener(_focusListener);
     _focusNode.dispose();
+    _cityDatabaseService.close();
+    _subscription.cancel();
     super.dispose();
   }
 
@@ -179,6 +236,13 @@ class _HomePageState extends State<HomePage> {
               backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
               body: NestedScrollView(
                 headerSliverBuilder: (context, _) => [
+                  _connectivityResult == ConnectivityResult.none
+                      ? const SliverToBoxAdapter(
+                          child: NoInternetWidget(),
+                        )
+                      : const SliverToBoxAdapter(
+                          child: SizedBox.shrink(),
+                        ),
                   SliverAppBar(
                     bottom: PreferredSize(
                       preferredSize: Size.fromHeight(
@@ -195,38 +259,54 @@ class _HomePageState extends State<HomePage> {
                     flexibleSpace: TopBar(
                       refresh: () => setState(() {}),
                       onSearch: (value) {
-                        setState(() {
-                          _searchValue = value;
-                          if (_searchValue.isEmpty) {
-                            _filteredCities = cities;
-                          } else {
-                            List<City> startsWith = cities
-                                .where((city) =>
-                                    city.name.toLowerCase().startsWith(
-                                        _searchValue.toLowerCase()) ||
-                                    ('${city.name}, ${city.country}')
-                                        .toLowerCase()
-                                        .startsWith(_searchValue.toLowerCase()))
-                                .toList();
-                            List<City> contains = cities
-                                .where((city) =>
-                                    city.name
-                                        .toLowerCase()
-                                        .contains(_searchValue.toLowerCase()) ||
-                                    ('${city.name}, ${city.country}')
-                                        .toLowerCase()
-                                        .contains(_searchValue.toLowerCase()))
-                                .toList();
-                            _filteredCities = startsWith +
-                                contains
-                                    .where((city) => !startsWith.contains(city))
-                                    .toList();
-                          }
-                        });
+                        getCities(value);
                       },
                       focusNode: _focusNode,
                       isReadyToType: _readyToType,
                     ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: _openAppSettingsForPermission
+                        ? Container(
+                            width: MediaQuery.of(context).size.width,
+                            margin: EdgeInsets.symmetric(
+                              horizontal:
+                                  MediaQuery.of(context).size.width * 0.1,
+                            ),
+                            decoration: const BoxDecoration(
+                              color: Colors.blueAccent,
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(20),
+                              ),
+                            ),
+                            child: ListTile(
+                              leading: const Icon(
+                                Icons.location_off_rounded,
+                                color: Colors.white,
+                              ),
+                              title: const Text(
+                                'Location is off',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              subtitle: const Text(
+                                'Please turn on location services to use this feature',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
+                              trailing: TextButton(
+                                onPressed: () => Geolocator.openAppSettings(),
+                                child: const Text(
+                                  'Open',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                            ),
+                          )
+                        : const SizedBox.shrink(),
                   ),
                 ],
                 body: _searchValue.isNotEmpty
@@ -273,7 +353,9 @@ class _HomePageState extends State<HomePage> {
                                 });
                               } else {
                                 setState(() {
-                                  _weatherCities.remove(_filteredCities[index]);
+                                  _weatherCities.removeWhere((element) =>
+                                      element.name ==
+                                      _filteredCities[index].name);
                                 });
                               }
                             }),
@@ -291,11 +373,9 @@ class _HomePageState extends State<HomePage> {
                               City item = _weatherCities[oldIndex];
                               _weatherCities.remove(item);
                               _weatherCities.insert(newIndex, item);
-                              _prefs.setStringList(
-                                'cities',
-                                _weatherCities.map((e) => e.name).toList(),
-                              );
                             });
+                            CityDatabaseService.instance
+                                .reorderCities(_weatherCities);
                           }
                         },
                         keyboardDismissBehavior:
@@ -313,12 +393,7 @@ class _HomePageState extends State<HomePage> {
                                     setState(() {
                                       _weatherCities.removeAt(
                                           _weatherCities.indexOf(city));
-                                      _prefs.setStringList(
-                                        'cities',
-                                        _weatherCities
-                                            .map((e) => e.name)
-                                            .toList(),
-                                      );
+                                      _cityDatabaseService.delete(city.name);
                                     });
                                   },
                                 ),

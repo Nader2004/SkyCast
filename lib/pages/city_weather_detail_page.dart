@@ -109,11 +109,12 @@ class CityWeatherDetailPage extends StatelessWidget {
             top: MediaQuery.of(context).size.height * 0.15,
             child: SingleChildScrollView(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                     crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         city.isMyLocation
                             ? const ShadowText(
@@ -124,6 +125,7 @@ class CityWeatherDetailPage extends StatelessWidget {
                             : const SizedBox.shrink(),
                         ShadowText(
                           data: city.name,
+                          textAlign: TextAlign.center,
                           fontSize: city.isMyLocation ? 20 : 35,
                           fontWeight: city.isMyLocation
                               ? FontWeight.w500
@@ -143,10 +145,14 @@ class CityWeatherDetailPage extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         ShadowText(
                           data: getWeatherTemprature(
-                              weatherData.current.temp, prefs),
+                            weatherData.current.temp,
+                            prefs,
+                          ),
+                          textAlign: TextAlign.center,
                           fontSize: 35,
                         ),
                         Row(
@@ -343,7 +349,8 @@ class CityWeatherDetailPage extends StatelessWidget {
                   ),
                   TextButton(
                     onPressed: () {
-                      final Uri url = Uri.parse('http://localhost/weatherWeb%203/homePage.php');
+                      final Uri url = Uri.parse(
+                          'http://localhost/weatherWeb%203/homePage.php');
                       _launchUrl(url);
                     },
                     child: const Text('Further Information'),

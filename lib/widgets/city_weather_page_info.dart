@@ -23,7 +23,7 @@ class CityWeatherInfoPage extends StatefulWidget {
 
 class _CityWeatherInfoPageState extends State<CityWeatherInfoPage> {
   late SharedPreferences _prefs;
-  late Future<WeatherData> _initializedFuture;
+  late Future<WeatherData?> _initializedFuture;
 
   @override
   void initState() {
@@ -52,7 +52,7 @@ class _CityWeatherInfoPageState extends State<CityWeatherInfoPage> {
       height: MediaQuery.of(context).size.height,
       color: Theme.of(context).colorScheme.secondaryContainer,
       alignment: Alignment.center,
-      child: FutureBuilder<WeatherData>(
+      child: FutureBuilder<WeatherData?>(
         future: _initializedFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting ||
@@ -99,6 +99,7 @@ class _CityWeatherInfoPageState extends State<CityWeatherInfoPage> {
                                 : const SizedBox.shrink(),
                             ShadowText(
                               data: widget.city.name,
+                              textAlign: TextAlign.center,
                               fontSize: widget.city.isMyLocation ? 20 : 35,
                               fontWeight: widget.city.isMyLocation
                                   ? FontWeight.w500

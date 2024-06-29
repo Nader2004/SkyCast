@@ -37,7 +37,7 @@ class CityWeatherInfo extends StatefulWidget {
 
 class _CityWeatherInfoState extends State<CityWeatherInfo> {
   late SharedPreferences _prefs;
-  late Future<WeatherData> _initializedFuture;
+  late Future<WeatherData?> _initializedFuture;
 
   @override
   void initState() {
@@ -72,9 +72,9 @@ class _CityWeatherInfoState extends State<CityWeatherInfo> {
         color: Theme.of(context).colorScheme.secondaryContainer,
         borderRadius: BorderRadius.circular(20),
       ),
-      child: FutureBuilder<WeatherData>(
+      child: FutureBuilder<WeatherData?>(
         future: _initializedFuture,
-        builder: (BuildContext context, AsyncSnapshot<WeatherData> snapshot) {
+        builder: (BuildContext context, AsyncSnapshot<WeatherData?> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting ||
               snapshot.data == null) {
             return Shimmer.fromColors(
@@ -136,31 +136,35 @@ class _CityWeatherInfoState extends State<CityWeatherInfo> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              widget.city.isMyLocation
-                                  ? const Text(
-                                      'My Location',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    )
-                                  : const SizedBox.shrink(),
-                              Text(
-                                widget.city.name,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: widget.city.isMyLocation ? 14 : 26,
-                                  fontWeight: widget.city.isMyLocation
-                                      ? FontWeight.w500
-                                      : FontWeight.bold,
+                          Expanded(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                widget.city.isMyLocation
+                                    ? const Text(
+                                        'My Location',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      )
+                                    : const SizedBox.shrink(),
+                                Text(
+                                  widget.city.name,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize:
+                                        widget.city.isMyLocation ? 14 : 26,
+                                    fontWeight: widget.city.isMyLocation
+                                        ? FontWeight.w500
+                                        : FontWeight.bold,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                           Text(
                             getWeatherTemprature(

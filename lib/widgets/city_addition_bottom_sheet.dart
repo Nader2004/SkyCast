@@ -3,6 +3,7 @@ import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sky_cast/models/city.dart';
 import 'package:sky_cast/models/weather_data.dart';
+import 'package:sky_cast/services/database/city_database_service.dart';
 import 'package:sky_cast/services/weather_api_service.dart';
 import 'package:sky_cast/widgets/shadow_text.dart';
 import 'package:sky_cast/widgets/utils/weather_condition.dart';
@@ -31,9 +32,10 @@ class CityAdditionButtomSheet extends StatefulWidget {
 }
 
 class _CityAdditionButtomSheetState extends State<CityAdditionButtomSheet> {
-  late Future<WeatherData> _initializedFuture;
+  late Future<WeatherData?> _initializedFuture;
+  late CityDatabaseService _cityDatabaseService;
   late SharedPreferences _prefs;
-  List<String> _cities = [];
+  final List<City> _cities = [];
 
   @override
   void initState() {
@@ -45,8 +47,11 @@ class _CityAdditionButtomSheetState extends State<CityAdditionButtomSheet> {
   /// Initializes shared preferences and loads the list of saved cities.
   void initPrefs() async {
     _prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _cities = _prefs.getStringList('cities') ?? [];
+    _cityDatabaseService = CityDatabaseService.instance;
+    _cityDatabaseService.readAll().then((value) {
+      setState(() {
+        _cities.addAll(value);
+      });
     });
   }
 
@@ -59,6 +64,12 @@ class _CityAdditionButtomSheetState extends State<CityAdditionButtomSheet> {
   }
 
   @override
+  void dispose() {
+    // _cityDatabaseService.close();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
       height: MediaQuery.of(context).size.height * 0.8,
@@ -68,9 +79,9 @@ class _CityAdditionButtomSheetState extends State<CityAdditionButtomSheet> {
         borderRadius: BorderRadius.circular(20),
       ),
       alignment: Alignment.center,
-      child: FutureBuilder<WeatherData>(
+      child: FutureBuilder<WeatherData?>(
         future: _initializedFuture,
-        builder: (BuildContext context, AsyncSnapshot<WeatherData> snapshot) {
+        builder: (BuildContext context, AsyncSnapshot<WeatherData?> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting ||
               snapshot.data == null) {
             return LottieBuilder.asset(
@@ -81,6 +92,7 @@ class _CityAdditionButtomSheetState extends State<CityAdditionButtomSheet> {
             );
           }
           final WeatherData weatherData = snapshot.data as WeatherData;
+          final city = widget.city;
           return Stack(
             fit: StackFit.expand,
             children: [
@@ -111,15 +123,15 @@ class _CityAdditionButtomSheetState extends State<CityAdditionButtomSheet> {
                       ),
                       TextButton(
                         onPressed: () {
-                          if (_cities.contains(widget.city.name)) {
-                            _cities.remove(widget.city.name);
-                            _prefs.setStringList('cities', _cities);
+                          if (_cities.any((x) => x.name == city.name)) {
+                            _cities.removeWhere((x) => x.name == city.name);
+                            _cityDatabaseService.delete(city.name);
                             Navigator.of(context).pop(
                               {'city': widget.city, 'action': 'remove'},
                             );
                           } else {
-                            _cities.add(widget.city.name);
-                            _prefs.setStringList('cities', _cities);
+                            _cities.add(city);
+                            _cityDatabaseService.create(city);
                             Navigator.of(context).pop(
                               {'city': widget.city, 'action': 'add'},
                             );
@@ -127,7 +139,7 @@ class _CityAdditionButtomSheetState extends State<CityAdditionButtomSheet> {
                           widget.action();
                         },
                         child: ShadowText(
-                          data: _cities.contains(widget.city.name)
+                          data: _cities.any((x) => x.name == city.name)
                               ? 'Remove'
                               : 'Add',
                           fontSize: 20,
@@ -145,6 +157,7 @@ class _CityAdditionButtomSheetState extends State<CityAdditionButtomSheet> {
                       padding: const EdgeInsets.all(8.0),
                       child: ShadowText(
                         data: widget.city.name,
+                        textAlign: TextAlign.center,
                         fontSize: 35,
                         fontWeight: FontWeight.bold,
                       ),
