@@ -236,13 +236,6 @@ class _HomePageState extends State<HomePage> {
               backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
               body: NestedScrollView(
                 headerSliverBuilder: (context, _) => [
-                  _connectivityResult == ConnectivityResult.none
-                      ? const SliverToBoxAdapter(
-                          child: NoInternetWidget(),
-                        )
-                      : const SliverToBoxAdapter(
-                          child: SizedBox.shrink(),
-                        ),
                   SliverAppBar(
                     bottom: PreferredSize(
                       preferredSize: Size.fromHeight(
